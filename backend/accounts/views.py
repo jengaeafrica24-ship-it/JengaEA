@@ -48,6 +48,40 @@ class UserRegistrationView(generics.CreateAPIView):
     
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
+
+    def create(self, request, *args, **kwargs):
+        logger.info("=== Registration Request Debug Info ===")
+        logger.info(f"Request method: {request.method}")
+        logger.info(f"Content type: {request.content_type}")
+        logger.info(f"Headers: {dict(request.headers)}")
+        logger.info(f"Data: {request.data}")
+        
+        serializer = self.get_serializer(data=request.data)
+        
+        if not serializer.is_valid():
+            logger.error(f"Validation errors: {serializer.errors}")
+            return Response(
+                {"error": "Registration failed", "details": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            user = serializer.save()
+            logger.info(f"User created successfully: {user.email}")
+            auth_token, _ = AuthToken.objects.get_or_create(user=user)
+            
+            return Response({
+                "token": auth_token.key,
+                "user_id": user.id,
+                "email": user.email
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            logger.exception("Error during user registration")
+            return Response(
+                {"error": "Registration failed", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     permission_classes = [permissions.AllowAny]
     
     def create(self, request, *args, **kwargs):
