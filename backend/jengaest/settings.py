@@ -34,71 +34,27 @@ RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# CORS and CSRF settings
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    # Frontend production domains
-    "https://jengaea.onrender.com",
-    "https://jengaeafrontend.onrender.com",
-]
-# By default do not allow credentials cross-origin unless explicitly required.
-# Using credentials with a wildcard origin ('*') is not allowed by browsers and
-# is a common source of CORS issues. Set to True only if you rely on cookie/session
-# authentication and you have configured CORS_ALLOWED_ORIGINS to an explicit list.
-CORS_ALLOW_CREDENTIALS = False
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-]
+# ==================== CORS CONFIGURATION ====================
+# CRITICAL: These settings must match your React axios configuration
 
-# Ensure CORS handles preflight requests properly
-CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
-
-# CSRF Trusted Origins
-csrf_origins_str = os.getenv('CSRF_TRUSTED_ORIGINS', '')
 if DEBUG:
-    CSRF_TRUSTED_ORIGINS = [
-        'http://localhost:3000',
-        'http://127.0.0.1:3000'
+    # Development: Allow all origins for easier local development
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
     ]
 else:
-    # Allow explicit production frontend origins for CSRF protection. You can
-    # supply additional origins via the CSRF_TRUSTED_ORIGINS env var (comma-separated).
-    prod_origins = ['https://jengaea.onrender.com', 'https://jengaeafrontend.onrender.com']
-    if csrf_origins_str:
-        extra = [o.strip() for o in csrf_origins_str.split(',') if o.strip()]
-        CSRF_TRUSTED_ORIGINS = prod_origins + extra
-    else:
-        CSRF_TRUSTED_ORIGINS = prod_origins
+    # Production: Explicit whitelist of allowed origins
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = [
+        "https://jengaea.onrender.com",
+        "https://jengaeafrontend.onrender.com",
+    ]
 
-# Session and Cookie settings
-SESSION_COOKIE_SECURE = not DEBUG  # True in production (HTTPS only)
-CSRF_COOKIE_SECURE = not DEBUG     # True in production (HTTPS only)
-SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'  # 'None' required for cross-origin in production
-CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
-CSRF_COOKIE_HTTPONLY = False       # Required for AJAX requests
-CSRF_USE_SESSIONS = False
-CSRF_COOKIE_NAME = 'csrftoken'
-SESSION_COOKIE_HTTPONLY = True
+# CRITICAL: Must be True when using withCredentials: true in axios
+CORS_ALLOW_CREDENTIALS = True
 
-# Additional CORS settings
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -122,6 +78,39 @@ CORS_ALLOW_HEADERS = [
     'access-control-request-headers',
 ]
 
+# Ensure CORS handles preflight requests properly
+CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
+
+# ==================== CSRF CONFIGURATION ====================
+
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    ]
+else:
+    # Production: Explicit whitelist of trusted origins
+    CSRF_TRUSTED_ORIGINS = [
+        'https://jengaea.onrender.com',
+        'https://jengaeafrontend.onrender.com',
+    ]
+    # Allow additional origins from environment variable
+    csrf_origins_str = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+    if csrf_origins_str:
+        extra_origins = [o.strip() for o in csrf_origins_str.split(',') if o.strip()]
+        CSRF_TRUSTED_ORIGINS.extend(extra_origins)
+
+# ==================== SESSION AND COOKIE SETTINGS ====================
+
+SESSION_COOKIE_SECURE = not DEBUG  # True in production (HTTPS only)
+CSRF_COOKIE_SECURE = not DEBUG     # True in production (HTTPS only)
+SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+CSRF_COOKIE_HTTPONLY = False       # Required for JavaScript to read CSRF token
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
+SESSION_COOKIE_HTTPONLY = True
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -141,9 +130,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Must be first
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Moved up for better static file serving
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'estimates.middleware.RequestLoggingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -174,7 +163,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'jengaest.wsgi.application'
 
 # Database Configuration
-# Use DATABASE_URL from Render in production, otherwise use individual env vars
 if os.getenv('DATABASE_URL'):
     # Production database (Render provides DATABASE_URL)
     DATABASES = {
