@@ -2,10 +2,8 @@ import axios from 'axios';
 
 // CRITICAL: Get API URL from environment variable
 // Temporary hardcoded fix for production
-const API_BASE_URL = process.env.REACT_APP_API_URL || 
-  (process.env.NODE_ENV === 'production' 
-    ? 'https://jengaea.onrender.com' 
-    : 'http://localhost:8000');
+// Force production URL during development for testing
+const API_BASE_URL = 'https://jengaea.onrender.com';
 
 // Debug logging
 console.log('🔧 API Configuration:');

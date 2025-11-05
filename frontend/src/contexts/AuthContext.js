@@ -140,16 +140,17 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       console.log('📝 Starting registration...');
+      console.log('API Base URL:', api.defaults.baseURL);
       
-      // Ensure all required fields are present
+      // Ensure all required fields are present and properly formatted
       const registrationData = {
-        email: userData.email,
-        phone_number: userData.phone_number,
+        email: userData.email.toLowerCase().trim(),
+        phone_number: userData.phone_number.trim(),
         password: userData.password,
         password_confirm: userData.password_confirm,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        role: userData.role || 'CONTRACTOR',
+        first_name: userData.first_name.trim(),
+        last_name: userData.last_name.trim(),
+        role: (userData.role || 'contractor').toLowerCase().trim(),
       };
 
       // Optional fields
