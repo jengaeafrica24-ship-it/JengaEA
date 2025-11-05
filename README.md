@@ -1,0 +1,269 @@
+JengaEafrica is an intelligent construction cost estimation platform designed to provide accurate, location-based project cost breakdowns for the African construction industry. The platform combines data-driven intelligence with an intuitive interface to help users plan efficiently, reduce cost overruns, and make informed construction decisions.
+
+## 🌟 Features
+
+### Core Features
+- **User Authentication & Verification**: Secure sign-up with OTP-based phone verification using Africa's Talking API
+- **Project Selection & Filtering**: Choose from predefined project types (residential, commercial, infrastructure)
+- **Location-Based Cost Adjustment**: Dynamic pricing based on regional variations using Google Maps integration
+- **Real-Time Cost Estimation**: Detailed breakdowns with material, labor, equipment, and overhead costs
+- **Report Generation**: Export cost reports in PDF or Excel format with company branding
+- **Subscription Management**: Flexible subscription plans (6 months, 12 months, lifetime)
+- **Admin Dashboard**: Complete user and data management system
+
+### User Roles
+- **Homeowners**: Estimate costs for personal construction projects
+- **Contractors**: Professional cost estimation for client projects
+- **Engineers**: Technical cost analysis and project planning
+- **Developers**: Large-scale project cost management
+- **Admins**: Platform management and analytics
+
+## 🏗️ Architecture
+
+### Backend (Django)
+- **Django REST Framework**: RESTful API endpoints
+- **PostgreSQL**: Primary database
+- **Redis**: Caching and Celery task queue
+- **Celery**: Background task processing
+- **Africa's Talking API**: SMS OTP verification
+- **Google Maps API**: Location services and geocoding
+
+### Frontend (React)
+- **React 18**: Modern React with hooks
+- **React Router**: Client-side routing
+- **React Query**: Data fetching and caching
+- **React Hook Form**: Form management
+- **Tailwind CSS**: Utility-first styling
+- **Lucide React**: Beautiful icons
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Node.js 16+
+- PostgreSQL 12+
+- Redis 6+
+
+### Backend Setup
+
+1. **Clone and navigate to backend directory**:
+```bash
+cd backend
+```
+
+2. **Create virtual environment**:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**:
+```bash
+pip install -r requirements.txt
+```
+
+4. **Set up environment variables**:
+```bash
+cp env_example.txt .env
+# Edit .env with your configuration
+```
+
+5. **Set up database**:
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+```
+
+6. **Run development server**:
+```bash
+python manage.py runserver
+```
+
+### Frontend Setup
+
+1. **Navigate to frontend directory**:
+```bash
+cd frontend
+```
+
+2. **Install dependencies**:
+```bash
+npm install
+```
+
+3. **Start development server**:
+```bash
+npm start
+```
+
+## 📁 Project Structure
+
+```
+cost2/
+├── backend/
+│   ├── jengaest/           # Django project settings
+│   ├── accounts/           # User authentication & profiles
+│   ├── projects/           # Project types & materials
+│   ├── estimates/          # Cost estimation logic
+│   ├── subscriptions/      # Subscription management
+│   ├── reports/            # Report generation
+│   └── manage.py
+├── frontend/
+│   ├── src/
+│   │   ├── components/     # Reusable React components
+│   │   ├── pages/          # Page components
+│   │   ├── contexts/       # React contexts
+│   │   ├── utils/          # Utility functions
+│   │   └── App.js
+│   └── package.json
+└── README.md
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file in the backend directory with the following variables:
+
+```env
+# Django Settings
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+
+# Database
+DB_NAME=jengaest
+DB_USER=postgres
+DB_PASSWORD=password
+DB_HOST=localhost
+DB_PORT=5432
+
+# Africa's Talking API
+AFRICAS_TALKING_USERNAME=your-username
+AFRICAS_TALKING_API_KEY=your-api-key
+
+# Google Maps API
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+
+# Celery
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+```
+
+### API Keys Setup
+
+1. **Africa's Talking**: Sign up at [africastalking.com](https://africastalking.com  ) for SMS services
+2. **Google Maps**: Get API key from [Google Cloud Console](https://console.cloud.google.com  )
+
+## 📊 Database Models
+
+### Core Models
+- **User**: Custom user model with role-based access
+- **ProjectType**: Different types of construction projects
+- **Location**: Geographic locations with cost multipliers
+- **Estimate**: Cost estimation records
+- **SubscriptionPlan**: Available subscription tiers
+- **Report**: Generated cost reports
+
+### Key Relationships
+- Users can have multiple estimates and subscriptions
+- Estimates are linked to project types and locations
+- Reports are generated from estimates
+- Material and labor prices vary by location
+
+## 🔌 API Endpoints
+
+### Authentication
+- `POST /api/auth/register/` - User registration
+- `POST /api/auth/login/` - User login
+- `POST /api/auth/send-otp/` - Send OTP verification
+- `POST /api/auth/verify-otp/` - Verify OTP code
+
+### Projects
+- `GET /api/projects/types/` - List project types
+- `GET /api/projects/locations/` - List locations
+- `GET /api/projects/materials/` - List materials
+- `GET /api/projects/labor/prices/` - Labor pricing data
+
+### Estimates
+- `GET /api/estimates/` - List user estimates
+- `POST /api/estimates/` - Create new estimate
+- `POST /api/estimates/calculate/` - Calculate project cost
+- `GET /api/estimates/{id}/` - Get estimate details
+
+### Reports
+- `POST /api/reports/generate/` - Generate cost report
+- `GET /api/reports/{id}/download/` - Download report file
+- `POST /api/reports/{id}/share/` - Share report
+
+## 🎨 UI Components
+
+### Core Components
+- **Button**: Customizable button with variants
+- **Input**: Form input with validation
+- **Card**: Content container with header/body/footer
+- **LoadingSpinner**: Loading indicator
+- **ProtectedRoute**: Authentication guard
+
+### Layout Components
+- **Navbar**: Main navigation with user menu
+- **Footer**: Site footer with links
+- **Sidebar**: Optional sidebar navigation
+
+## 🔒 Security Features
+
+- **OTP Verification**: Phone number verification via SMS
+- **JWT Authentication**: Secure API authentication
+- **Role-Based Access**: Different access levels for users
+- **Input Validation**: Server and client-side validation
+- **CORS Configuration**: Secure cross-origin requests
+
+## 📱 Mobile Responsiveness
+
+The platform is fully responsive and works on:
+- Desktop computers
+- Tablets
+- Mobile phones
+- Progressive Web App (PWA) capabilities
+
+## 🚀 Deployment
+
+### Production Setup
+
+1. **Backend Deployment**:
+```bash
+# Set DEBUG=False in production
+# Configure production database
+# Set up static file serving
+# Configure SSL certificates
+```
+
+2. **Frontend Deployment**:
+```bash
+npm run build
+# Deploy build folder to static hosting
+```
+
+3. **Database Migration**:
+```bash
+python manage.py migrate
+python manage.py collectstatic
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Email: support@jengaest.com
+- Documentation: [docs.jengaest.com](https://docs.jengaest.com  )
+- Issues: GitHub Issues

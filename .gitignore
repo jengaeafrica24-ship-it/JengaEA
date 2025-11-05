@@ -1,0 +1,76 @@
+
+# Python
+*.py[cod]
+*$.py.class
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+backend/.env
+backend/env_config.txt
+backend/env_example.txt
+.env.*
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+*.sqlite3
+
+# Node/React
+frontend/node_modules/
+frontend/.env
+frontend/.env.*
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.turbo/
+frontend/coverage/
+frontend/yarn-error.log
+frontend/npm-debug.log
+frontend/package-lock.json
+frontend/yarn.lock
+
+# System
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+*.bak
+*.swp
+*.swo
+*.tmp
+*.log
+*.orig
+
+# VSCode
+.vscode/
+
+# Test/Mock files
+test_*.py
+test_*.js
+*.bak
+*.test.js
+*.test.jsx
+*.spec.js
+*.spec.jsx
+*.coverage
+
+# Misc
+*.tgz
+*.tar.gz
+*.zip
+*.7z
+*.egg-info/
+*.egg
+*.idea/
+*.iml
