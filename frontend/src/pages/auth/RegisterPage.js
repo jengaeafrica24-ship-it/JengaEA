@@ -225,10 +225,10 @@ const RegisterPage = () => {
                   {...register('role', { required: 'Role is required' })}
                 >
                   <option value="">Select your role</option>
-                  <option value="HOMEOWNER">Homeowner</option>
-                  <option value="CONTRACTOR">Contractor</option>
-                  <option value="ENGINEER">Engineer</option>
-                  <option value="DEVELOPER">Developer</option>
+                  <option value="homeowner">Homeowner</option>
+                  <option value="contractor">Contractor</option>
+                  <option value="engineer">Engineer</option>
+                  <option value="developer">Developer</option>
                 </select>
                 {errors.role && (
                   <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
