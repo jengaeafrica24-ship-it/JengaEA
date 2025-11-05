@@ -14,14 +14,31 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
+    // Log full request configuration
+    console.log('=== API Request Configuration ===');
+    console.log('URL:', config.baseURL + config.url);
+    console.log('Method:', config.method?.toUpperCase());
+    console.log('Headers:', config.headers);
+    console.log('Timeout:', config.timeout);
+    console.log('WithCredentials:', config.withCredentials);
+    
+    // Add CSRF token if it exists
+    const csrfToken = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('csrftoken='))
+      ?.split('=')[1];
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
+    }
+
+    // Add auth token if it exists
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Token ${token}`;
     }
-    // Log request for debugging
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+
     if (config.data) {
-      console.log('[API Request Data]', config.data);
+      console.log('Request Data:', config.data);
     }
     return config;
   },
@@ -34,12 +51,22 @@ api.interceptors.request.use(
 // Response interceptor to handle common errors
 api.interceptors.response.use(
   (response) => {
-    console.log(`[API Response] ${response.status} ${response.config?.method?.toUpperCase()} ${response.config?.url}`);
+    console.log('=== API Response Success ===');
+    console.log('Status:', response.status);
+    console.log('URL:', response.config?.url);
+    console.log('Method:', response.config?.method?.toUpperCase());
+    console.log('Response Data:', response.data);
+    
+    // Check if the response has the expected structure
+    if (!response.data.hasOwnProperty('success')) {
+      console.warn('Response missing success flag:', response.data);
+    }
+    
     return response;
   },
   (error) => {
-    // Log error details for debugging
-    console.error('[API Error]', {
+    console.error('=== API Response Error ===');
+    console.error('Error Details:', {
       message: error.message,
       code: error.code,
       status: error.response?.status,
@@ -49,8 +76,12 @@ api.interceptors.response.use(
       hasResponse: !!error.response,
       hasRequest: !!error.request,
       baseURL: error.config?.baseURL,
-      data: error.response?.data,
     });
+
+    // Log the full error response if available
+    if (error.response?.data) {
+      console.error('Error Response Data:', error.response.data);
+    }
     
     // Network or DNS issues
     if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
@@ -59,7 +90,34 @@ api.interceptors.response.use(
         url: error.config?.url,
         error: error.message
       });
+      return Promise.reject({
+        success: false,
+        message: 'Network error. Please check your connection and try again.',
+        error: error.message
+      });
     }
+
+    // Transform Django validation errors
+    if (error.response?.status === 400 && error.response?.data?.errors) {
+      const errors = error.response.data.errors;
+      const message = Object.entries(errors)
+        .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join('\n');
+      
+      return Promise.reject({
+        success: false,
+        message: 'Validation failed',
+        errors: errors,
+        detailedMessage: message
+      });
+    }
+
+    // Handle other error cases
+    return Promise.reject({
+      success: false,
+      message: error.response?.data?.message || error.message,
+      error: error.response?.data || error.message
+    });
     
     if (error.code === 'ECONNABORTED') {
       console.error('⚠️  Request timeout - server took too long to respond');
@@ -87,20 +145,47 @@ export default api;
 export const authAPI = {
   login: (credentials) => api.post('/api/auth/login/', credentials),
   register: (userData) => {
-    console.log('Attempting registration with:', { ...userData, password: '[REDACTED]' });
+    console.log('=== Registration Request Started ===');
+    console.log('Request URL:', api.defaults.baseURL + '/api/auth/register/');
+    console.log('Request Data:', {
+      ...userData,
+      password: '[REDACTED]',
+      password_confirm: '[REDACTED]'
+    });
+    console.log('Request Headers:', api.defaults.headers);
+    
     return api.post('/api/auth/register/', userData)
-      .catch(error => {
-        console.error('Registration error details:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          headers: error.response?.headers,
-          config: {
-            url: error.config?.url,
-            baseURL: error.config?.baseURL,
-            method: error.config?.method,
-            headers: error.config?.headers
-          }
+      .then(response => {
+        console.log('=== Registration Success ===');
+        console.log('Response:', {
+          status: response.status,
+          data: response.data,
+          headers: response.headers
         });
+        return response;
+      })
+      .catch(error => {
+        console.error('=== Registration Failed ===');
+        console.error('Error Type:', error.constructor.name);
+        console.error('Error Message:', error.message);
+        
+        if (error.response) {
+          console.error('Response Status:', error.response.status);
+          console.error('Response Data:', error.response.data);
+          console.error('Response Headers:', error.response.headers);
+        } else if (error.request) {
+          console.error('No Response Received');
+          console.error('Request Details:', {
+            url: error.config?.url,
+            method: error.config?.method,
+            baseURL: error.config?.baseURL,
+            timeout: error.config?.timeout,
+            headers: error.config?.headers
+          });
+        } else {
+          console.error('Request Setup Failed:', error.message);
+        }
+        
         throw error;
       });
   },
