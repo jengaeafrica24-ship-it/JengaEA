@@ -22,37 +22,45 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-prod
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Allowed hosts configuration
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'jengaea.onrender.com',
+    'jengaeafrontend.onrender.com'
+]
 
 # Add Render hostname if present
 RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
-# CORS and CSRF settings - FIXED VERSION
-# Development CORS origins (always include for local testing)
-DEV_CORS_ORIGINS = [
+# CORS and CSRF settings
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
+    "https://jengaeafrontend.onrender.com"
 ]
-
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ALLOWED_ORIGINS = DEV_CORS_ORIGINS
-else:
-    CORS_ALLOW_ALL_ORIGINS = False
-    # Get production origins from environment variable
-    cors_origins_str = os.getenv('CORS_ALLOWED_ORIGINS', '')
-    if cors_origins_str:
-        CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',') if origin.strip()]
-    else:
-        # Fallback - but this should be set in production!
-        CORS_ALLOWED_ORIGINS = []
-        print("WARNING: CORS_ALLOWED_ORIGINS not set in production!")
-
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Ensure CORS handles preflight requests properly
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
@@ -66,7 +74,7 @@ if DEBUG:
     ]
 else:
     if csrf_origins_str:
-        CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins_str.split(',') if origin.strip()]
+        CSRF_TRUSTED_ORIGINS = 'https://jengaeafrontend.onrender.com',
     else:
         CSRF_TRUSTED_ORIGINS = []
         print("WARNING: CSRF_TRUSTED_ORIGINS not set in production!")

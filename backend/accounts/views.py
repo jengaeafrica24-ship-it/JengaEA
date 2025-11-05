@@ -55,25 +55,44 @@ class UserRegistrationView(generics.CreateAPIView):
         logger.info(f"Content type: {request.content_type}")
         logger.info(f"Headers: {dict(request.headers)}")
         logger.info(f"Data: {request.data}")
+        logger.info(f"Files: {dict(request.FILES) if request.FILES else 'No files'}")
+        logger.info(f"Query params: {dict(request.GET)}")
+        logger.info(f"Session: {dict(request.session)}")
+        logger.info("=== End Request Info ===")
         
         serializer = self.get_serializer(data=request.data)
+        logger.info(f"Using serializer: {serializer.__class__.__name__}")
         
         if not serializer.is_valid():
-            logger.error(f"Validation errors: {serializer.errors}")
-            return Response(
-                {"error": "Registration failed", "details": serializer.errors},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            logger.error("=== Validation Errors ===")
+            for field, errors in serializer.errors.items():
+                logger.error(f"{field}: {errors}")
+            logger.error("=== End Validation Errors ===")
+            
+            return Response({
+                "success": False,
+                "message": "Validation failed",
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
             
         try:
             user = serializer.save()
             logger.info(f"User created successfully: {user.email}")
-            auth_token, _ = AuthToken.objects.get_or_create(user=user)
+            logger.info(f"User details: id={user.id}, role={user.role}, verified={user.is_verified}")
+            
+            # Create auth token
+            auth_token, created = AuthToken.objects.get_or_create(user=user)
+            logger.info(f"Auth token {'created' if created else 'retrieved'}: {auth_token.key[:10]}...")
             
             return Response({
-                "token": auth_token.key,
-                "user_id": user.id,
-                "email": user.email
+                "success": True,
+                "message": "User registered successfully",
+                "data": {
+                    "token": auth_token.key,
+                    "user_id": user.id,
+                    "email": user.email,
+                    "role": user.role
+                }
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
@@ -83,21 +102,6 @@ class UserRegistrationView(generics.CreateAPIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     permission_classes = [permissions.AllowAny]
-    
-    def create(self, request, *args, **kwargs):
-        logger.debug("=== Registration Request Debug Info ===")
-        logger.debug(f"Registration request data: {request.data}")
-        logger.debug(f"Content type: {request.content_type}")
-        logger.debug(f"Request method: {request.method}")
-        logger.debug(f"Request user: {request.user}")
-        logger.debug(f"Request auth: {request.auth}")
-        logger.debug(f"Request headers: {dict(request.headers)}")
-        logger.debug(f"Request META: {request.META}")
-        logger.debug("=== End Debug Info ===")
-        
-        serializer = self.get_serializer(data=request.data)
-        
-        if not serializer.is_valid():
             logger.debug(f"Serializer errors: {serializer.errors}")
             return Response({
                 'success': False,
