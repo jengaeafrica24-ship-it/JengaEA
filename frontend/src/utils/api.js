@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-// Create axios instance with base configuration
 const api = axios.create({
+  // Use environment variable for production, fallback to localhost for development
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
-  timeout: 120000, // Increased timeout for long-running Gemini API calls (120s)
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,  // Important for CORS with credentials
+  withCredentials: true,
 });
 
 // Request interceptor to add auth token
