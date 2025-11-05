@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // Use environment variable for production, fallback to localhost for development
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+  baseURL: process.env.REACT_APP_API_URL='https://jengaea.onrender.com',
   timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
