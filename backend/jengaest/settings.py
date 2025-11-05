@@ -1,48 +1,73 @@
 """
 Django settings for jengaest project.
+Production-ready configuration for Render deployment.
 """
 
 from pathlib import Path
-from decouple import config
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env file (only in development)
+if os.path.exists(BASE_DIR / '.env'):
+    load_dotenv(BASE_DIR / '.env')
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', 'testserver']
+# Allowed hosts configuration
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+# Add Render hostname if present
+RENDER_EXTERNAL_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # CORS and CSRF settings
-CORS_ALLOW_ALL_ORIGINS = True
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = os.getenv(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:3000'
+    ).split(',')
+
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
+
+# Development CORS origins (always include for local testing)
+DEV_CORS_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
 ]
+
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = DEV_CORS_ORIGINS
 
 # Ensure CORS handles preflight requests properly
 CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-]
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000'
+).split(',')
 
-# Session settings
-SESSION_COOKIE_SECURE = False  # Set to True in production
-CSRF_COOKIE_SECURE = False    # Set to True in production
-CSRF_COOKIE_HTTPONLY = False  # Required for AJAX requests
+# Session and Cookie settings
+SESSION_COOKIE_SECURE = not DEBUG  # True in production
+CSRF_COOKIE_SECURE = not DEBUG     # True in production
+CSRF_COOKIE_HTTPONLY = False       # Required for AJAX requests
 CSRF_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
+SESSION_COOKIE_HTTPONLY = True
 
 # Additional CORS settings
 CORS_ALLOW_METHODS = [
@@ -88,15 +113,15 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'estimates.middleware.RequestLoggingMiddleware',  # Add request logging
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Moved up for better static file serving
+    'estimates.middleware.RequestLoggingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'jengaest.urls'
@@ -119,23 +144,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jengaest.wsgi.application'
 
-
-# Database
-
-# Load .env file
-load_dotenv(os.path.join(BASE_DIR, '.env'))
-
-# Now use os.getenv() instead of config()
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'Jenga'),
-        'USER': os.getenv('DB_USER', 'Jenga'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'Access'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+# Database Configuration
+# Use DATABASE_URL from Render in production, otherwise use individual env vars
+if os.getenv('DATABASE_URL'):
+    # Production database (Render provides DATABASE_URL)
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # Development database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'Jenga'),
+            'USER': os.getenv('DB_USER', 'Jenga'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'Access'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -161,9 +193,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+
+# Only include STATICFILES_DIRS if the directory exists
+if os.path.exists(BASE_DIR / 'static'):
+    STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Whitenoise configuration for static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -204,35 +240,18 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_TOKEN': None, 
 }
 
-# CORS settings - Use django-cors-headers configuration
-# Note: CORS_ALLOW_ALL_ORIGINS and CORS_ORIGIN_ALLOW_ALL are duplicates
-# We use the settings from the top of the file which are correct
-
-# Disable CSRF for development
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-CSRF_COOKIE_SECURE = False
-CSRF_COOKIE_HTTPONLY = False
-CSRF_USE_SESSIONS = False
-CSRF_COOKIE_NAME = 'csrftoken'
-
-# Session settings
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = False
-
 # Africa's Talking API settings
-AFRICAS_TALKING_USERNAME = 'Kwepo' 
-AFRICAS_TALKING_API_KEY = 'atsk_df21b2b69ada2c52b81d7ec2a29d77500103fb6286a5a2fa2c0e72f782f880e03b5885e6'
-AFRICAS_TALKING_SENDER_ID ='AFTKNG'
+AFRICAS_TALKING_USERNAME = os.getenv('AFRICAS_TALKING_USERNAME', 'Kwepo')
+AFRICAS_TALKING_API_KEY = os.getenv('AFRICAS_TALKING_API_KEY', '')
+AFRICAS_TALKING_SENDER_ID = os.getenv('AFRICAS_TALKING_SENDER_ID', 'AFTKNG')
 
-# For sandbox testing, you need to register these numbers in Africa's Talking dashboard
-AFRICAS_TALKING_TEST_NUMBERS = [
-    '+254711XXXYYY',  # Add your test Enumbers here
-]
+# For sandbox testing
+AFRICAS_TALKING_TEST_NUMBERS = os.getenv(
+    'AFRICAS_TALKING_TEST_NUMBERS',
+    ''
+).split(',') if os.getenv('AFRICAS_TALKING_TEST_NUMBERS') else []
 
-# Logging configuration for SMS
+# Logging configuration
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -251,19 +270,19 @@ LOGGING = {
     'loggers': {
         'accounts.utils': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
         },
         'estimates': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
         },
         'estimates.views': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
         },
         'estimates.middleware': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'DEBUG' if DEBUG else 'INFO',
         },
         'django': {
             'handlers': ['console'],
@@ -277,20 +296,36 @@ LOGGING = {
 }
 
 # Google Maps API settings
-GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default='')
+GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY', '')
+
+# Gemini API settings
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'models/gemini-pro')
 
 # Celery settings
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 
 # Email settings
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # File upload settings
-FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  
-DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
