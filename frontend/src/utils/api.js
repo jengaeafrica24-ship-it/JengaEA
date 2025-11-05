@@ -2,12 +2,13 @@ import axios from 'axios';
 
 const api = axios.create({
   // Use environment variable for production, fallback to localhost for development
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+  baseURL: process.env.REACT_APP_API_URL || 'https://jengaea.onrender.com',
   timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
   },
-  withCredentials: true,
+  withCredentials: false, // Changed to false for cross-origin requests
 });
 
 // Request interceptor to add auth token
@@ -47,7 +48,18 @@ api.interceptors.response.use(
       method: error.config?.method,
       hasResponse: !!error.response,
       hasRequest: !!error.request,
+      baseURL: error.config?.baseURL,
+      data: error.response?.data,
     });
+    
+    // Network or DNS issues
+    if (error.code === 'ERR_NETWORK' || error.code === 'ECONNABORTED') {
+      console.error('Network Error:', {
+        baseURL: error.config?.baseURL,
+        url: error.config?.url,
+        error: error.message
+      });
+    }
     
     if (error.code === 'ECONNABORTED') {
       console.error('⚠️  Request timeout - server took too long to respond');
@@ -94,10 +106,10 @@ export const authAPI = {
   },
   sendOTP: (phoneNumber) => api.post('/api/auth/send-otp/', phoneNumber),
   verifyOTP: (data) => api.post('/api/auth/verify-otp/', data),
-  logout: () => api.post('/auth/logout/'),
-  getProfile: () => api.get('/auth/profile/'),
-  updateProfile: (data) => api.patch('/auth/profile/', data),
-  getDashboard: () => api.get('/auth/dashboard/'),
+  logout: () => api.post('/api/auth/logout/'),
+  getProfile: () => api.get('/api/auth/profile/'),
+  updateProfile: (data) => api.patch('/api/auth/profile/', data),
+  getDashboard: () => api.get('/api/auth/dashboard/'),
 };
 
 export const projectsAPI = {
