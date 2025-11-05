@@ -74,7 +74,24 @@ export default api;
 // API endpoints
 export const authAPI = {
   login: (credentials) => api.post('/api/auth/login/', credentials),
-  register: (userData) => api.post('/api/auth/register/', userData),
+  register: (userData) => {
+    console.log('Attempting registration with:', { ...userData, password: '[REDACTED]' });
+    return api.post('/api/auth/register/', userData)
+      .catch(error => {
+        console.error('Registration error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          headers: error.response?.headers,
+          config: {
+            url: error.config?.url,
+            baseURL: error.config?.baseURL,
+            method: error.config?.method,
+            headers: error.config?.headers
+          }
+        });
+        throw error;
+      });
+  },
   sendOTP: (phoneNumber) => api.post('/api/auth/send-otp/', phoneNumber),
   verifyOTP: (data) => api.post('/api/auth/verify-otp/', data),
   logout: () => api.post('/auth/logout/'),
