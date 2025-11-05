@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -100,25 +100,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     dispatch({ type: 'LOGIN_START' });
     try {
-      // Get CSRF token first
-      const csrfResponse = await axios.get('/api/auth/csrf/');
-      const csrfToken = csrfResponse.data.csrfToken;
-
-      // Make login request with CSRF token
-      const response = await axios.post('/api/auth/login/', credentials, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
-        withCredentials: true
-      });
+      // Make login request using configured API instance
+      const response = await api.post('/api/auth/login/', credentials);
 
       if (response.data.success) {
         const { token, user } = response.data;
         
         localStorage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+        api.defaults.headers.common['Authorization'] = `Token ${token}`;
         
         dispatch({
           type: 'LOGIN_SUCCESS',
@@ -165,22 +154,14 @@ export const AuthProvider = ({ children }) => {
       if (userData.company_name) requiredFields.company_name = userData.company_name;
       if (userData.location) requiredFields.location = userData.location;
 
-      // Get CSRF token first
-      const csrfResponse = await axios.get('/api/auth/csrf/');
-      const csrfToken = csrfResponse.data.csrfToken;
-
-      // Set up headers with CSRF token
-      const headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-CSRFToken': csrfToken
-      };
-
       // Log registration attempt for debugging
-      console.log('Attempting registration with data:', requiredFields);
+      console.log('Attempting registration with:', {
+        url: api.defaults.baseURL + '/api/auth/register/',
+        data: requiredFields
+      });
 
-      // If simple registration works, try the main registration
-      const response = await axios.post('/api/auth/register/', requiredFields, { headers });
+      // Make the registration request using our configured API instance
+      const response = await api.post('/api/auth/register/', requiredFields);
       
       // Check if backend returned success flag
       if (response.data.success) {

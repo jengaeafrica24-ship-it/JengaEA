@@ -14,6 +14,7 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState(null);
   const [step, setStep] = useState(1); // 1: Registration, 2: OTP Verification
   const [registrationData, setRegistrationData] = useState(null);
   const { register: registerUser, sendOTP } = useAuth();
@@ -31,6 +32,7 @@ const RegisterPage = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     setProgress(0);
+    setError(null);
     let percent = 0;
     const interval = setInterval(() => {
       percent += Math.floor(Math.random() * 10) + 5;
@@ -45,16 +47,19 @@ const RegisterPage = () => {
       console.log('=== Registration Request ===');
       console.log('Form data:', data);
       
+      console.log('Attempting registration with data:', data);
+      
       // Register user
       const result = await registerUser(data);
-      console.log('=== Registration Response ===');
-      console.log('Response:', result);
+      console.log('=== Registration Response ===', result);
       
       if (!result.success) {
-        // Handle specific error messages
-        const errorMessage = result.error || 'Registration failed. Please check your details and try again.';
-        throw new Error(errorMessage);
+        setError(result.error || 'Registration failed. Please check your details and try again.');
+        throw new Error(result.error || 'Registration failed');
       }
+      
+      // If successful, clear any previous errors
+      setError(null);
       console.log('Result:', result);
       
       setProgress(100);
@@ -150,6 +155,11 @@ const RegisterPage = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="py-8">
           <Card.Body>
+            {error && (
+              <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+                {error}
+              </div>
+            )}
             <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
               {/* Personal Information */}
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
