@@ -49,6 +49,8 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
 
+    permission_classes = [permissions.AllowAny]
+
     def create(self, request, *args, **kwargs):
         logger.info("=== Registration Request Debug Info ===")
         logger.info(f"Request method: {request.method}")
@@ -101,42 +103,6 @@ class UserRegistrationView(generics.CreateAPIView):
                 {"error": "Registration failed", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-    permission_classes = [permissions.AllowAny]
-            logger.debug(f"Serializer errors: {serializer.errors}")
-            return Response({
-                'success': False,
-                'message': 'Validation failed',
-                'errors': serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            # Create user
-            user = serializer.save()
-            
-            # Send OTP
-            otp_result = self._send_otp_internal(user.phone_number, user)
-            
-            logger.info(f"User registered successfully: {user.email}")
-            
-            return Response({
-                'success': True,
-                'message': 'Registration successful. Please verify your phone number.',
-                'data': {
-                    'user_id': user.id,
-                    'email': user.email,
-                    'phone_number': user.phone_number,
-                    'role': user.role,
-                    'otp_sent': otp_result['success']
-                }
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            logger.error(f"Registration error: {str(e)}", exc_info=True)
-            return Response({
-                'success': False,
-                'message': 'An error occurred during registration',
-                'errors': {'detail': str(e)}
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
     def _send_otp_internal(self, phone_number, user=None):
         """Internal method to send OTP"""
