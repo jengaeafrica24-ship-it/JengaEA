@@ -1,13 +1,18 @@
 import axios from 'axios';
 
 // CRITICAL: Get API URL from environment variable
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Temporary hardcoded fix for production
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'https://jengaea.onrender.com' 
+    : 'http://localhost:8000');
 
 // Debug logging
 console.log('🔧 API Configuration:');
 console.log('  REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+console.log('  NODE_ENV:', process.env.NODE_ENV);
 console.log('  Final Base URL:', API_BASE_URL);
-console.log('  Environment:', process.env.NODE_ENV);
+console.log('  All REACT_APP_ vars:', Object.keys(process.env).filter(k => k.startsWith('REACT_APP_')));
 
 // Create axios instance with correct configuration
 const api = axios.create({
