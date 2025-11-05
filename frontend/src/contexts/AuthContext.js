@@ -187,31 +187,40 @@ export const AuthProvider = ({ children }) => {
       let errorDetails = {};
       
       if (error.response?.data) {
-        if (error.response.data.errors) {
+        const responseData = error.response.data;
+        console.log('Full error response:', responseData);
+        
+        if (responseData.errors) {
           // Format validation errors
-          const errors = error.response.data.errors;
-          errorDetails = errors;
-          
-          const errorMessages = Object.entries(errors).map(([field, msgs]) => {
-            const msgArray = Array.isArray(msgs) ? msgs : [msgs];
-            return `${field}: ${msgArray.join(', ')}`;
-          });
+          errorDetails = responseData.errors;
+          const errorMessages = Object.entries(responseData.errors)
+            .map(([field, msgs]) => {
+              const msgArray = Array.isArray(msgs) ? msgs : [msgs];
+              return `${field}: ${msgArray.join(', ')}`;
+            });
           message = errorMessages.join('\n');
-        } else if (error.response.data.message) {
-          message = error.response.data.message;
-        } else if (error.response.data.error) {
-          message = error.response.data.error;
-        } else if (typeof error.response.data === 'string') {
-          message = error.response.data;
+        } else if (responseData.message) {
+          message = responseData.message;
+        } else if (responseData.detail) {
+          message = responseData.detail;
+        } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0) {
+          // Handle DRF field-level errors
+          const errorMessages = Object.entries(responseData)
+            .map(([field, msgs]) => {
+              const msgArray = Array.isArray(msgs) ? msgs : [msgs];
+              return `${field}: ${msgArray.join(', ')}`;
+            });
+          message = errorMessages.join('\n');
+          errorDetails = responseData;
+        } else {
+          message = String(responseData);
         }
-      } else if (error.message) {
-        message = error.message;
       }
       
       toast.error(message);
       return { 
         success: false, 
-        error: message, 
+        error: message,
         errors: errorDetails 
       };
     }
