@@ -41,12 +41,20 @@ const RegisterPage = () => {
       setProgress(percent);
     }, 120);
     try {
+      // Log the registration request
+      console.log('=== Registration Request ===');
+      console.log('Form data:', data);
+      
       // Register user
       const result = await registerUser(data);
+      console.log('=== Registration Response ===');
+      console.log('Result:', result);
+      
       setProgress(100);
       setTimeout(() => {
         setIsLoading(false);
         if (result.success) {
+          console.log('=== Registration Successful ===');
           setRegistrationData({
             user_id: result.data?.user_id,
             phone_number: data.phone_number,
@@ -54,12 +62,17 @@ const RegisterPage = () => {
           setStep(2);
         } else {
           // Handle validation errors if any
-          console.error('Registration failed:', result.error, result.errors);
+          console.error('=== Registration Failed ===');
+          console.error('Error:', result.error);
+          console.error('Validation errors:', result.errors);
         }
       }, 400);
     } catch (error) {
+      console.error('=== Registration Exception ===');
+      console.error('Error object:', error);
+      console.error('Response data:', error.response?.data);
+      console.error('Status code:', error.response?.status);
       setIsLoading(false);
-      console.error('Registration exception:', error);
     }
   };
 
@@ -212,10 +225,10 @@ const RegisterPage = () => {
                   {...register('role', { required: 'Role is required' })}
                 >
                   <option value="">Select your role</option>
-                  <option value="homeowner">Homeowner</option>
-                  <option value="contractor">Contractor</option>
-                  <option value="engineer">Engineer</option>
-                  <option value="developer">Developer</option>
+                  <option value="HOMEOWNER">Homeowner</option>
+                  <option value="CONTRACTOR">Contractor</option>
+                  <option value="ENGINEER">Engineer</option>
+                  <option value="DEVELOPER">Developer</option>
                 </select>
                 {errors.role && (
                   <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>

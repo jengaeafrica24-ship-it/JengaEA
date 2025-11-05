@@ -180,7 +180,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Attempting registration with data:', requiredFields);
 
       // If simple registration works, try the main registration
-      const response = await axios.post('/api/auth/register/', userData, { headers });
+      const response = await axios.post('/api/auth/register/', requiredFields, { headers });
       
       // Check if backend returned success flag
       if (response.data.success) {
