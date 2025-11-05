@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     dispatch({ type: 'LOGIN_START' });
     try {
-      // Make login request using configured API instance
+      console.log('🔑 Attempting login...');
       const response = await api.post('/api/auth/login/', credentials);
 
       if (response.data.success) {
@@ -139,29 +139,29 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
+      console.log('📝 Starting registration...');
+      
       // Ensure all required fields are present
-      const requiredFields = {
+      const registrationData = {
         email: userData.email,
         phone_number: userData.phone_number,
         password: userData.password,
         password_confirm: userData.password_confirm,
         first_name: userData.first_name,
         last_name: userData.last_name,
-        role: userData.role || 'CONTRACTOR', // Default role if not provided
+        role: userData.role || 'CONTRACTOR',
       };
 
       // Optional fields
-      if (userData.company_name) requiredFields.company_name = userData.company_name;
-      if (userData.location) requiredFields.location = userData.location;
+      if (userData.company_name) registrationData.company_name = userData.company_name;
+      if (userData.location) registrationData.location = userData.location;
 
-      // Log registration attempt for debugging
-      console.log('Attempting registration with:', {
-        url: api.defaults.baseURL + '/api/auth/register/',
-        data: requiredFields
-      });
-
-      // Make the registration request using our configured API instance
-      const response = await api.post('/api/auth/register/', requiredFields);
+      console.log('📤 Sending registration request...');
+      
+      // Make the registration request
+      const response = await api.post('/api/auth/register/', registrationData);
+      
+      console.log('✅ Registration response received:', response.data);
       
       // Check if backend returned success flag
       if (response.data.success) {
@@ -179,7 +179,9 @@ export const AuthProvider = ({ children }) => {
         };
       }
     } catch (error) {
-      console.error('Registration error:', error.response || error);
+      console.error('❌ Registration error:', error);
+      console.error('Response:', error.response?.data);
+      
       // Extract error messages from Django response
       let message = 'Registration failed';
       let errorDetails = {};
@@ -199,7 +201,11 @@ export const AuthProvider = ({ children }) => {
           message = error.response.data.message;
         } else if (error.response.data.error) {
           message = error.response.data.error;
+        } else if (typeof error.response.data === 'string') {
+          message = error.response.data;
         }
+      } else if (error.message) {
+        message = error.message;
       }
       
       toast.error(message);
@@ -213,6 +219,7 @@ export const AuthProvider = ({ children }) => {
 
   const sendOTP = async (phoneNumber) => {
     try {
+      console.log('📱 Sending OTP to:', phoneNumber);
       const response = await api.post('/api/auth/send-otp/', {
         phone_number: phoneNumber,
       });
@@ -226,6 +233,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: message };
       }
     } catch (error) {
+      console.error('❌ Send OTP error:', error);
       const message = error.response?.data?.message || error.response?.data?.error || 'Failed to send OTP';
       toast.error(message);
       return { success: false, error: message };
@@ -234,7 +242,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyOTP = async (phoneNumber, otp) => {
     try {
-      // Use configured API instance (it handles CSRF token injection)
+      console.log('🔐 Verifying OTP...');
       const response = await api.post('/api/auth/verify-otp/', {
         phone_number: phoneNumber,
         otp_code: otp,
@@ -249,6 +257,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: message };
       }
     } catch (error) {
+      console.error('❌ Verify OTP error:', error);
       const message = error.response?.data?.message || error.response?.data?.error || 'OTP verification failed';
       toast.error(message);
       return { success: false, error: message };
