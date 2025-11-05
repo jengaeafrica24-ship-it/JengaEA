@@ -254,7 +254,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'UNAUTHENTICATED_USER': None, 
-    'UNAUTHENTICATED_TOKEN': None, 
+    'UNAUTHENTICATED_TOKEN': None,
 }
 
 # Africa's Talking API settings

@@ -25,18 +25,7 @@ api.interceptors.request.use(
     console.log('  URL:', config.baseURL + config.url);
     console.log('  Method:', config.method?.toUpperCase());
     
-    // Add CSRF token from cookies (Django requirement)
-    const csrfToken = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('csrftoken='))
-      ?.split('=')[1];
-    
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
-      console.log('  CSRF Token:', csrfToken.substring(0, 10) + '...');
-    }
-
-    // Add auth token from localStorage
+    // Add auth token from localStorage (for authenticated requests)
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Token ${token}`;
