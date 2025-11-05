@@ -48,6 +48,13 @@ const RegisterPage = () => {
       // Register user
       const result = await registerUser(data);
       console.log('=== Registration Response ===');
+      console.log('Response:', result);
+      
+      if (!result.success) {
+        // Handle specific error messages
+        const errorMessage = result.error || 'Registration failed. Please check your details and try again.';
+        throw new Error(errorMessage);
+      }
       console.log('Result:', result);
       
       setProgress(100);

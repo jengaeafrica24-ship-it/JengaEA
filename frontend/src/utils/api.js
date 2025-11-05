@@ -11,6 +11,19 @@ const api = axios.create({
   withCredentials: false, // Changed to false for cross-origin requests
 });
 
+// Add response interceptor for error logging
+api.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('=== API Error ===');
+    console.error('Status:', error.response?.status);
+    console.error('Data:', error.response?.data);
+    console.error('Headers:', error.response?.headers);
+    console.error('Full error:', error);
+    return Promise.reject(error);
+  }
+);
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
