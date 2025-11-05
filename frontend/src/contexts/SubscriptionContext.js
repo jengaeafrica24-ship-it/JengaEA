@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from './AuthContext';
 
 const SubscriptionContext = createContext();
@@ -65,7 +65,7 @@ export const SubscriptionProvider = ({ children }) => {
   const fetchSubscriptionData = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const response = await axios.get('/api/subscriptions/current/');
+  const response = await api.get('/api/subscriptions/current/');
       dispatch({ type: 'SET_SUBSCRIPTION', payload: response.data });
     } catch (error) {
       console.error('Error fetching subscription:', error);
@@ -77,7 +77,7 @@ export const SubscriptionProvider = ({ children }) => {
 
   const fetchSubscriptionPlans = async () => {
     try {
-      const response = await axios.get('/api/subscriptions/plans/');
+  const response = await api.get('/api/subscriptions/plans/');
       dispatch({ type: 'SET_PLANS', payload: response.data });
     } catch (error) {
       console.error('Error fetching subscription plans:', error);
@@ -86,7 +86,7 @@ export const SubscriptionProvider = ({ children }) => {
 
   const fetchUsageData = async () => {
     try {
-      const response = await axios.get('/api/subscriptions/usage/');
+  const response = await api.get('/api/subscriptions/usage/');
       dispatch({ type: 'SET_USAGE', payload: response.data.usage });
     } catch (error) {
       console.error('Error fetching usage data:', error);
@@ -95,7 +95,7 @@ export const SubscriptionProvider = ({ children }) => {
 
   const subscribeToPlan = async (planId, paymentMethod, autoRenew = false) => {
     try {
-      const response = await axios.post('/api/subscriptions/', {
+      const response = await api.post('/api/subscriptions/', {
         plan_id: planId,
         payment_method: paymentMethod,
         auto_renew: autoRenew,
@@ -114,7 +114,7 @@ export const SubscriptionProvider = ({ children }) => {
 
   const upgradeSubscription = async (newPlanId, paymentMethod) => {
     try {
-      const response = await axios.post('/api/subscriptions/upgrade/', {
+      const response = await api.post('/api/subscriptions/upgrade/', {
         new_plan_id: newPlanId,
         payment_method: paymentMethod,
       });
@@ -132,7 +132,7 @@ export const SubscriptionProvider = ({ children }) => {
 
   const cancelSubscription = async () => {
     try {
-      const response = await axios.post('/api/subscriptions/cancel/');
+  const response = await api.post('/api/subscriptions/cancel/');
       
       // Refresh subscription data
       await fetchSubscriptionData();
@@ -147,7 +147,7 @@ export const SubscriptionProvider = ({ children }) => {
 
   const recordUsage = async (action, resourceType, resourceId = '') => {
     try {
-      const response = await axios.post('/api/subscriptions/record-usage/', {
+      const response = await api.post('/api/subscriptions/record-usage/', {
         action,
         resource_type: resourceType,
         resource_id: resourceId,

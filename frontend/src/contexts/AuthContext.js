@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+      api.defaults.headers.common['Authorization'] = `Token ${token}`;
     }
   }, [state.token]);
 
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Token ${token}`;
+      api.defaults.headers.common['Authorization'] = `Token ${token}`;
       // Verify token and get user data
       verifyToken();
     } else {
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyToken = async () => {
     try {
-      const response = await axios.get('/api/auth/dashboard/');
+      const response = await api.get('/api/auth/dashboard/');
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {
@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }) => {
       });
     } catch (error) {
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common['Authorization'];
       dispatch({ type: 'LOGIN_FAILURE' });
     }
   };
@@ -213,7 +213,7 @@ export const AuthProvider = ({ children }) => {
 
   const sendOTP = async (phoneNumber) => {
     try {
-      const response = await axios.post('/api/auth/send-otp/', {
+      const response = await api.post('/api/auth/send-otp/', {
         phone_number: phoneNumber,
       });
       
@@ -234,19 +234,10 @@ export const AuthProvider = ({ children }) => {
 
   const verifyOTP = async (phoneNumber, otp) => {
     try {
-      // Get CSRF token first
-      const csrfResponse = await axios.get('/api/auth/csrf/');
-      const csrfToken = csrfResponse.data.csrfToken;
-
-      const response = await axios.post('/api/auth/verify-otp/', {
+      // Use configured API instance (it handles CSRF token injection)
+      const response = await api.post('/api/auth/verify-otp/', {
         phone_number: phoneNumber,
         otp_code: otp,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken
-        },
-        withCredentials: true
       });
       
       if (response.data.success) {
@@ -266,12 +257,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('/api/auth/logout/');
+      await api.post('/api/auth/logout/');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
+      delete api.defaults.headers.common['Authorization'];
       dispatch({ type: 'LOGOUT' });
       toast.success('Logged out successfully!');
     }
@@ -279,7 +270,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.patch('/api/auth/profile/', profileData);
+      const response = await api.patch('/api/auth/profile/', profileData);
       dispatch({ type: 'UPDATE_USER', payload: response.data });
       toast.success('Profile updated successfully!');
       return { success: true, data: response.data };
