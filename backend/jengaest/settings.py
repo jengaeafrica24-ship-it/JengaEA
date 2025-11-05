@@ -39,9 +39,15 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://jengaeafrontend.onrender.com"
+    # Frontend production domains
+    "https://jengaea.onrender.com",
+    "https://jengaeafrontend.onrender.com",
 ]
-CORS_ALLOW_CREDENTIALS = True
+# By default do not allow credentials cross-origin unless explicitly required.
+# Using credentials with a wildcard origin ('*') is not allowed by browsers and
+# is a common source of CORS issues. Set to True only if you rely on cookie/session
+# authentication and you have configured CORS_ALLOWED_ORIGINS to an explicit list.
+CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -73,11 +79,14 @@ if DEBUG:
         'http://127.0.0.1:3000'
     ]
 else:
+    # Allow explicit production frontend origins for CSRF protection. You can
+    # supply additional origins via the CSRF_TRUSTED_ORIGINS env var (comma-separated).
+    prod_origins = ['https://jengaea.onrender.com', 'https://jengaeafrontend.onrender.com']
     if csrf_origins_str:
-        CSRF_TRUSTED_ORIGINS = 'https://jengaeafrontend.onrender.com',
+        extra = [o.strip() for o in csrf_origins_str.split(',') if o.strip()]
+        CSRF_TRUSTED_ORIGINS = prod_origins + extra
     else:
-        CSRF_TRUSTED_ORIGINS = []
-        print("WARNING: CSRF_TRUSTED_ORIGINS not set in production!")
+        CSRF_TRUSTED_ORIGINS = prod_origins
 
 # Session and Cookie settings
 SESSION_COOKIE_SECURE = not DEBUG  # True in production (HTTPS only)

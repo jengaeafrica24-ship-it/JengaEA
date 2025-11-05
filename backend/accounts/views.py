@@ -281,8 +281,6 @@ def send_otp(request):
             'success': True,
             'message': 'OTP sent successfully',
             'phone_number': phone_number,
-            # Remove this in production:
-            'otp_code': otp_code  # Only for development
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
@@ -418,8 +416,6 @@ def resend_otp(request):
             'success': True,
             'message': 'OTP resent successfully',
             'phone_number': phone_number,
-            # Remove in production:
-            'otp_code': otp_code
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
