@@ -99,4 +99,23 @@ api.interceptors.response.use(
   }
 );
 
+// Projects API utilities
+export const projectsAPI = {
+  getProjects: () => api.get('/api/projects/'),
+  getProject: (id) => api.get(`/api/projects/${id}/`),
+  createProject: (data) => api.post('/api/projects/', data),
+  updateProject: (id, data) => api.put(`/api/projects/${id}/`, data),
+  deleteProject: (id) => api.delete(`/api/projects/${id}/`),
+};
+
+// Estimates API utilities
+export const estimatesAPI = {
+  getEstimates: () => api.get('/api/estimates/'),
+  getEstimate: (id) => api.get(`/api/estimates/${id}/`),
+  createEstimate: (data) => api.post('/api/estimates/', data),
+  updateEstimate: (id, data) => api.put(`/api/estimates/${id}/`, data),
+  deleteEstimate: (id) => api.delete(`/api/estimates/${id}/`),
+};
+
+// Export the base API instance as default
 export default api;
