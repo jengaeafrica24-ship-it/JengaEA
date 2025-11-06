@@ -30,60 +30,65 @@ const RegisterPage = () => {
   const password = watch('password');
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
-    setProgress(0);
-    setError(null);
-    let percent = 0;
-    const interval = setInterval(() => {
-      percent += Math.floor(Math.random() * 10) + 5;
-      if (percent >= 100) {
-        percent = 100;
-        clearInterval(interval);
-      }
-      setProgress(percent);
-    }, 120);
+    let progressInterval;
     try {
-      // Log the registration request
-      console.log('=== Registration Request ===');
-      console.log('Form data:', data);
+      setIsLoading(true);
+      setProgress(0);
+      setError(null);
       
-      console.log('Attempting registration with data:', data);
+      // Start progress animation
+      let percent = 0;
+      progressInterval = setInterval(() => {
+        percent = Math.min(percent + 5, 95); // Don't reach 100 until complete
+        setProgress(percent);
+      }, 100);
+
+      console.log('🚀 Starting registration...');
+      console.log('📝 Form data:', {
+        ...data,
+        password: '[REDACTED]',
+        password_confirm: '[REDACTED]'
+      });
+      
+      // Prepare registration data
+      const formattedData = {
+        email: data.email.toLowerCase().trim(),
+        phone_number: data.phone_number.trim(),
+        password: data.password,
+        password_confirm: data.password_confirm,
+        first_name: data.first_name.trim(),
+        last_name: data.last_name.trim(),
+        role: (data.role || 'contractor').toLowerCase().trim(),
+        location: data.location?.trim(),
+        company_name: data.company_name?.trim(),
+      };
       
       // Register user
-      const result = await registerUser(data);
-      console.log('=== Registration Response ===', result);
+      const result = await registerUser(formattedData);
+      console.log('✅ Registration response:', result);
+      
+      // Clear interval and set progress to 100%
+      clearInterval(progressInterval);
+      setProgress(100);
       
       if (!result.success) {
-        setError(result.error || 'Registration failed. Please check your details and try again.');
         throw new Error(result.error || 'Registration failed');
       }
       
-      // If successful, clear any previous errors
+      // If we get here, registration was successful
       setError(null);
-      console.log('Result:', result);
+      setRegistrationData({
+        phone_number: formattedData.phone_number,
+        token: result.data?.token
+      });
+      setStep(2); // Move to OTP verification
       
-      setProgress(100);
-      setTimeout(() => {
-        setIsLoading(false);
-        if (result.success) {
-          console.log('=== Registration Successful ===');
-          setRegistrationData({
-            user_id: result.data?.user_id,
-            phone_number: data.phone_number,
-          });
-          setStep(2);
-        } else {
-          // Handle validation errors if any
-          console.error('=== Registration Failed ===');
-          console.error('Error:', result.error);
-          console.error('Validation errors:', result.errors);
-        }
-      }, 400);
-    } catch (error) {
-      console.error('=== Registration Exception ===');
-      console.error('Error object:', error);
-      console.error('Response data:', error.response?.data);
-      console.error('Status code:', error.response?.status);
+    } catch (err) {
+      console.error('❌ Registration error:', err);
+      clearInterval(progressInterval);
+      setError(err.message || 'Registration failed. Please try again.');
+      setProgress(0);
+    } finally {
       setIsLoading(false);
     }
   };
