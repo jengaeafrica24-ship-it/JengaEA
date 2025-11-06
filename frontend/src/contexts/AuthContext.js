@@ -140,7 +140,13 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       console.log('📝 Starting registration...');
-      console.log('API Base URL:', api.defaults.baseURL);
+      // Log the API URL being used
+      console.log('🔗 Using API URL:', api.defaults.baseURL);
+      console.log('📋 Registration data:', {
+        ...userData,
+        password: '[REDACTED]',
+        password_confirm: '[REDACTED]'
+      });
       
       // Ensure all required fields are present and properly formatted
       const registrationData = {
