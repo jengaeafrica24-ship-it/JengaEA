@@ -42,7 +42,9 @@ if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:3000",
+        "http://localhost:3001",
         "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
     ]
 else:
     # Production: Explicit whitelist of allowed origins
@@ -86,7 +88,9 @@ CORS_PREFLIGHT_MAX_AGE = 86400  # 24 hours
 if DEBUG:
     CSRF_TRUSTED_ORIGINS = [
         'http://localhost:3000',
-        'http://127.0.0.1:3000'
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001'
     ]
 else:
     # Production: Explicit whitelist of trusted origins

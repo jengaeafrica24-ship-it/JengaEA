@@ -1,7 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Clock, FileText, Eye, DollarSign, Filter, ChevronLeft, ChevronRight, RefreshCw, ClipboardList } from 'lucide-react';
-import { estimatesAPI, projectsAPI } from '../utils/api';
+import { 
+  Download, 
+  Share2, 
+  Trash2, 
+  FileText, 
+  Filter, 
+  ClipboardList, 
+  Clock, 
+  DollarSign, 
+  Eye, 
+  ChevronLeft, 
+  ChevronRight 
+} from 'lucide-react';
+import * as estimatesAPI from '../services/estimates';
+import { getProjectTypes, getLocations } from '../services/projects';
 import { cn } from '../utils/helpers';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
@@ -30,8 +43,8 @@ const EstimatesPage = () => {
   // Load filter options on mount
   useEffect(() => {
     Promise.all([
-      projectsAPI.getProjectTypes(),
-      projectsAPI.getLocations()
+      getProjectTypes(),
+      getLocations()
     ]).then(([types, locations]) => {
       setOptions(prev => ({
         ...prev,

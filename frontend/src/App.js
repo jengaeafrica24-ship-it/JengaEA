@@ -10,10 +10,6 @@ import FaviconLoader from './components/common/FaviconLoader';
 import { AuthProvider } from './contexts/AuthContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
-// Layout Components
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
-
 // Pages
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/auth/LoginPage';
@@ -28,6 +24,13 @@ import ProfilePage from './pages/ProfilePage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import DataGenerationPage from './pages/DataGenerationPage';
 import WalkthroughPage from './pages/WalkthroughPage';
+
+// Estimation Pages
+import MaterialCostPage from './pages/estimation/MaterialCostPage';
+import LaborCostPage from './pages/estimation/LaborCostPage';
+import ProjectSummaryPage from './pages/estimation/ProjectSummaryPage';
+import MarketAnalysisPage from './pages/estimation/MarketAnalysisPage';
+import NewEstimatePage from './pages/estimation/EstimatePage';
 
 // Protected Route Component
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -49,33 +52,36 @@ function App() {
       <AuthProvider>
         <SubscriptionProvider>
           <Router>
-            <FaviconLoader />
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-1">
-                <Routes>
-                  {/* Public Routes */}
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  
-                  {/* Protected Routes */}
-                  <Route path="/data-generation" element={<ProtectedRoute><DataGenerationPage /></ProtectedRoute>} />
-                  <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                  <Route path="/projects" element={<ProtectedRoute><ProjectSelectionPage /></ProtectedRoute>} />
-                  <Route path="/estimates" element={<ProtectedRoute><EstimatesPage /></ProtectedRoute>} />
-                  <Route path="/estimate/:id" element={<ProtectedRoute><EstimatePage /></ProtectedRoute>} />
-                  <Route path="/estimate/new" element={<ProtectedRoute><EstimatePage /></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-                  <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                  <Route path="/walkthrough" element={<WalkthroughPage />} />
-                  
-                  {/* Admin Routes */}
-                  <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
-                </Routes>
-              </main>
-              <Footer />
+            <div className="min-h-screen">
+              <FaviconLoader />
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                
+                {/* Protected Routes */}
+                <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                <Route path="/projects" element={<ProtectedRoute><ProjectSelectionPage /></ProtectedRoute>} />
+                <Route path="/estimates" element={<ProtectedRoute><EstimatesPage /></ProtectedRoute>} />
+                <Route path="/estimate/:id" element={<ProtectedRoute><EstimatePage /></ProtectedRoute>} />
+                <Route path="/estimate/new" element={<ProtectedRoute><EstimatePage /></ProtectedRoute>} />
+                <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
+                <Route path="/subscription" element={<ProtectedRoute><SubscriptionPage /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                <Route path="/data-generation" element={<ProtectedRoute><DataGenerationPage /></ProtectedRoute>} />
+                <Route path="/walkthrough" element={<WalkthroughPage />} />
+                
+                {/* Cost Estimation Routes */}
+                <Route path="/estimate/new" element={<ProtectedRoute><NewEstimatePage /></ProtectedRoute>} />
+                <Route path="/material-cost" element={<ProtectedRoute><MaterialCostPage /></ProtectedRoute>} />
+                <Route path="/labor-cost" element={<ProtectedRoute><LaborCostPage /></ProtectedRoute>} />
+                <Route path="/project-summary" element={<ProtectedRoute><ProjectSummaryPage /></ProtectedRoute>} />
+                <Route path="/market-analysis" element={<ProtectedRoute><MarketAnalysisPage /></ProtectedRoute>} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
+              </Routes>
               
               {/* Toast Notifications */}
               <Toaster

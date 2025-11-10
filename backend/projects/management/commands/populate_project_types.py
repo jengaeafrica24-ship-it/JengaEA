@@ -8,6 +8,30 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         project_types = [
             {
+                'name': 'Industrial',
+                'category': 'industrial',
+                'description': 'Industrial projects category',
+                'base_cost_per_sqm': Decimal('50000.00')
+            },
+            {
+                'name': 'Residential',
+                'category': 'residential',
+                'description': 'Residential projects category',
+                'base_cost_per_sqm': Decimal('45000.00')
+            },
+            {
+                'name': 'Commercial',
+                'category': 'commercial',
+                'description': 'Commercial projects category',
+                'base_cost_per_sqm': Decimal('65000.00')
+            },
+            {
+                'name': 'Infrastructure',
+                'category': 'infrastructure',
+                'description': 'Infrastructure projects category',
+                'base_cost_per_sqm': Decimal('25000.00')
+            },
+            {
                 'name': 'Single Family Home',
                 'category': 'residential',
                 'description': 'Standard single family residential construction',

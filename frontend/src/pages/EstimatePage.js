@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import { 
   Calculator, 
   Upload, 
@@ -14,35 +14,15 @@ import {
   MapPin,
   Ruler
 } from 'lucide-react';
+import MaterialEstimation from '../components/estimation/MaterialEstimation';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import { estimatesAPI, projectsAPI } from '../utils/api';
 import toast from 'react-hot-toast';
 
-// Location data comes from the backend API
-  { id: 27, name: 'Uasin Gishu', code: '027' },
-  { id: 28, name: 'Elgeyo-Marakwet', code: '028' },
-  { id: 29, name: 'Nandi', code: '029' },
-  { id: 30, name: 'Baringo', code: '030' },
-  { id: 31, name: 'Laikipia', code: '031' },
-  { id: 32, name: 'Nakuru', code: '032' },
-  { id: 33, name: 'Narok', code: '033' },
-  { id: 34, name: 'Kajiado', code: '034' },
-  { id: 35, name: 'Kericho', code: '035' },
-  { id: 36, name: 'Bomet', code: '036' },
-  { id: 37, name: 'Kakamega', code: '037' },
-  { id: 38, name: 'Vihiga', code: '038' },
-  { id: 39, name: 'Bungoma', code: '039' },
-  { id: 40, name: 'Busia', code: '040' },
-  { id: 41, name: 'Siaya', code: '041' },
-  { id: 42, name: 'Kisumu', code: '042' },
-  { id: 43, name: 'Homa Bay', code: '043' },
-  { id: 44, name: 'Migori', code: '044' },
-  { id: 45, name: 'Kisii', code: '045' },
-  { id: 46, name: 'Nyamira', code: '046' },
-  { id: 47, name: 'Nairobi', code: '047' }
-];
+// Initialize locations data
+const initialLocations = [];
 
 export default function EstimatePage() {
   const navigate = useNavigate();
@@ -50,6 +30,7 @@ export default function EstimatePage() {
   
   // Mode: 'manual' or 'upload'
   const [mode, setMode] = useState('manual');
+  const [currentView, setCurrentView] = useState('materials'); // Added for view management
   
   // Manual entry form data
   const [formData, setFormData] = useState({

@@ -99,6 +99,25 @@ const Navbar = () => {
                     </span>
                   </div>
                 )}
+              </>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  to="/auth/login"
+                  className="text-white hover:text-gray-200 px-4 py-2 text-sm font-medium"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/auth/register"
+                  className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+                
+                )}
 
                 {/* Profile Menu */}
                 <div className="relative">

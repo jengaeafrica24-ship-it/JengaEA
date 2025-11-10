@@ -2,7 +2,8 @@ from django.urls import path
 from django.http import HttpResponse
 from .views import (
     UserRegistrationView, UserLoginView, UserProfileView,
-    send_otp, verify_otp, user_logout, user_dashboard, simple_register
+    send_otp, verify_otp, user_logout, user_dashboard, 
+    simple_register, csrf_token
 )
 
 from django.middleware.csrf import get_token

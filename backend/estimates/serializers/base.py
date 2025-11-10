@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Estimate, EstimateItem, EstimateRevision, EstimateShare
+from ..models import Estimate, EstimateItem, EstimateRevision, EstimateShare
 from projects.serializers import ProjectTypeSerializer, LocationSerializer, ProjectTemplateSerializer
 from accounts.serializers import UserProfileSerializer
 
@@ -50,38 +50,35 @@ class EstimateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Estimate
         fields = (
-            'id', 'user', 'user_data', 'project_type', 'project_type_data', 'location', 'location_data',
-            'project_template', 'project_template_data', 'project_name', 'project_description',
-            'construction_type', 'building_type', 'data_period',
-            'total_area', 'base_cost_per_sqm', 'location_multiplier', 'adjusted_cost_per_sqm',
-            'total_estimated_cost', 'contingency_percentage', 'contingency_amount',
-            'source', 'original_filename',
-            'status', 'is_public', 'items', 'revisions', 'shares', 'created_at', 'updated_at'
+            'id', 'user', 'user_data', 'project_type', 'project_type_data',
+            'location', 'location_data', 'project_template', 'project_template_data',
+            'source', 'original_filename', 'file_path', 'project_name',
+            'construction_type', 'building_type', 'data_period', 'project_description',
+            'total_area', 'base_cost_per_sqm', 'location_multiplier',
+            'adjusted_cost_per_sqm', 'total_estimated_cost', 'contingency_percentage',
+            'contingency_amount', 'status', 'is_public', 'created_at', 'updated_at',
+            'task_id', 'processing_started_at', 'processing_completed_at',
+            'processing_error', 'items', 'revisions', 'shares'
         )
-        read_only_fields = ('total_estimated_cost', 'adjusted_cost_per_sqm', 'contingency_amount', 'created_at', 'updated_at', 'source', 'original_filename')
+        read_only_fields = (
+            'user', 'user_data', 'task_id', 'processing_started_at',
+            'processing_completed_at', 'processing_error', 'items',
+            'revisions', 'shares'
+        )
 
 
 class EstimateCreateSerializer(serializers.ModelSerializer):
-    """Serializer for creating estimates"""
-    
-    items = EstimateItemSerializer(many=True, required=False)
+    """Serializer for creating new estimates"""
     
     class Meta:
         model = Estimate
         fields = (
-            'project_type', 'location', 'project_template', 'project_name', 'project_description',
-            'total_area', 'base_cost_per_sqm', 'location_multiplier', 'contingency_percentage',
-            'items', 'building_type', 'construction_type', 'data_period'
+            'project_type', 'location', 'project_template', 'source',
+            'project_name', 'construction_type', 'building_type',
+            'data_period', 'project_description', 'total_area',
+            'base_cost_per_sqm', 'location_multiplier', 'adjusted_cost_per_sqm',
+            'total_estimated_cost', 'contingency_percentage', 'contingency_amount'
         )
-        
-    def create(self, validated_data):
-        items_data = validated_data.pop('items', [])
-        estimate = Estimate.objects.create(**validated_data)
-        
-        for item_data in items_data:
-            EstimateItem.objects.create(estimate=estimate, **item_data)
-            
-        return estimate
 
 
 class EstimateUpdateSerializer(serializers.ModelSerializer):
@@ -92,11 +89,15 @@ class EstimateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Estimate
         fields = (
-            'project_name', 'project_description', 'total_area', 'location_multiplier',
-            'contingency_percentage', 'status', 'is_public', 'items'
+            'project_type', 'location', 'project_template', 'project_name',
+            'construction_type', 'building_type', 'data_period',
+            'project_description', 'total_area', 'base_cost_per_sqm',
+            'location_multiplier', 'adjusted_cost_per_sqm', 'total_estimated_cost',
+            'contingency_percentage', 'contingency_amount', 'items'
         )
-        
+    
     def update(self, instance, validated_data):
+        """Update estimate and related items."""
         items_data = validated_data.pop('items', None)
         
         # Update estimate fields
@@ -138,6 +139,3 @@ class CostCalculationSerializer(serializers.Serializer):
     total_area = serializers.DecimalField(max_digits=10, decimal_places=2)
     contingency_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, default=10.00)
     custom_items = EstimateItemSerializer(many=True, required=False)
-
-
-

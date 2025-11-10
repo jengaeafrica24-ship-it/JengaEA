@@ -93,3 +93,48 @@ def create_gemini_estimate_task(self, user_id, project_details):
     except Exception as exc:
         logger.exception('Background create_gemini_estimate_task failed: %s', exc)
         return {'status': 'failed', 'error': str(exc)}
+
+@shared_task(bind=True)
+def process_building_plan(self, estimate_id):
+    """Process an uploaded building plan file."""
+    try:
+        estimate = Estimate.objects.get(id=estimate_id)
+        
+        # Update processing start time
+        estimate.processing_started_at = timezone.now()
+        estimate.save()
+        
+        # Validate file path
+        if not estimate.file_path:
+            raise ValueError("No file path specified")
+            
+        file_path = default_storage.path(estimate.file_path)
+        
+        # TODO: Add file processing logic here
+        # For now, just mark as processed
+        estimate.status = 'draft'
+        estimate.processing_completed_at = timezone.now()
+        estimate.save()
+        
+        return {
+            'status': 'success',
+            'estimate_id': estimate_id
+        }
+        
+    except Exception as e:
+        logger.exception('Failed to process building plan for estimate %s: %s', estimate_id, e)
+        
+        try:
+            estimate = Estimate.objects.get(id=estimate_id)
+            estimate.status = 'error'
+            estimate.processing_error = str(e)
+            estimate.processing_completed_at = timezone.now()
+            estimate.save()
+        except:
+            pass
+            
+        return {
+            'status': 'error',
+            'error': str(e),
+            'estimate_id': estimate_id
+        }

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Search, Home, Briefcase, Map, Play } from 'lucide-react';
+import { Search, Home, Briefcase, Map } from 'lucide-react';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import ProjectCard from '../components/common/ProjectCard';
-import { projectsAPI, estimatesAPI } from '../utils/api';
+import * as projectsAPI from '../services/projects';
+import * as estimatesAPI from '../services/estimates';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';

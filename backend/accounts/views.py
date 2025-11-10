@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework.authtoken.models import Token as AuthToken
 from django.contrib.auth import authenticate, login, logout
+from django.middleware.csrf import get_token
+from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -12,6 +14,16 @@ import random
 import logging
 
 from .models import User, OTPVerification
+
+@require_http_methods(["GET"])
+def csrf_token(request):
+    """
+    Endpoint to get CSRF token. Frontend should call this before registration.
+    """
+    return JsonResponse({
+        'csrfToken': get_token(request),
+        'success': True
+    })
 from .serializers import (
     UserRegistrationSerializer, 
     UserProfileSerializer,
@@ -20,14 +32,15 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
-@csrf_exempt
 def simple_register(request):
-    """Simplest possible registration endpoint for testing"""
+    """Simplest possible registration endpoint for testing with CSRF protection"""
     if request.method == 'POST':
         logger.debug("=== Simple Register Debug Info ===")
         logger.debug(f"Request method: {request.method}")
         logger.debug(f"Content type: {request.content_type}")
         logger.debug(f"Headers: {dict(request.headers)}")
+        logger.debug(f"CSRF Cookie: {request.COOKIES.get('csrftoken')}")
+        logger.debug(f"CSRF Header: {request.META.get('HTTP_X_CSRFTOKEN')}")
         logger.debug("=== End Simple Register Debug Info ===")
         
         return JsonResponse({
@@ -42,7 +55,6 @@ def simple_register(request):
     }, status=405)
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class UserRegistrationView(generics.CreateAPIView):
     """User registration endpoint"""
     

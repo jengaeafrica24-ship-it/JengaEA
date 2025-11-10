@@ -72,7 +72,16 @@ const RegisterPage = () => {
       setProgress(100);
       
       if (!result.success) {
-        throw new Error(result.error || 'Registration failed');
+        // Check for field-specific errors
+        if (result.errors) {
+          // Format the error message to show all field errors
+          const errorMessage = Object.entries(result.errors)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs[0] : msgs}`)
+            .join('\n');
+          throw new Error(errorMessage);
+        } else {
+          throw new Error(result.error || 'Registration failed');
+        }
       }
       
       // If we get here, registration was successful

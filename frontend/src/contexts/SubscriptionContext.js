@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import api from '../utils/api';
+import api from '../services/api';
 import { useAuth } from './AuthContext';
 
 const SubscriptionContext = createContext();

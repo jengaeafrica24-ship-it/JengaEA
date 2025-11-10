@@ -1,8 +1,30 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import api from '../utils/api';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
+// Create axios instance
+const api = axios.create({
+  baseURL: process.env.NODE_ENV === 'development'
+    ? 'http://localhost:8000'
+    : 'https://jengaea.onrender.com',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Create the context
 const AuthContext = createContext();
+
+// Create hook for using auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 const initialState = {
   user: null,
@@ -61,12 +83,27 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Set up axios defaults
+  // Add interceptor for CSRF token
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Token ${token}`;
-    }
-  }, [state.token]);
+    api.interceptors.request.use(
+      (config) => {
+        // Add auth token if available
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Token ${token}`;
+        }
+        
+        // Add CSRF token if available
+        const csrfToken = Cookies.get('csrftoken');
+        if (csrfToken) {
+          config.headers['X-CSRFToken'] = csrfToken;
+        }
+        
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+  }, []);
 
   // Check for existing token on mount
   useEffect(() => {
@@ -80,9 +117,18 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Get CSRF token before making auth requests
+  const getCSRFToken = async () => {
+    try {
+      await api.get('/api/auth/csrf/');
+    } catch (error) {
+      console.error('Error getting CSRF token:', error);
+    }
+  };
+
   const verifyToken = async () => {
     try {
-      const response = await api.get('/api/auth/dashboard/');
+      const response = await api.get('/api/auth/verify-token/');
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: {
@@ -101,6 +147,8 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'LOGIN_START' });
     try {
       console.log('🔑 Attempting login...');
+      // Get CSRF token first
+      await getCSRFToken();
       const response = await api.post('/api/auth/login/', credentials);
 
       if (response.data.success) {
@@ -140,6 +188,9 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       console.log('📝 Starting registration...');
+      // Get CSRF token first
+      await getCSRFToken();
+      
       // Log the API URL being used
       console.log('🔗 Using API URL:', api.defaults.baseURL);
       console.log('📋 Registration data:', {
@@ -162,6 +213,12 @@ export const AuthProvider = ({ children }) => {
       // Optional fields
       if (userData.company_name) registrationData.company_name = userData.company_name;
       if (userData.location) registrationData.location = userData.location;
+
+      // Validate phone number format before sending
+      const phoneRegex = /^\+254\d{9}$/;
+      if (!phoneRegex.test(registrationData.phone_number)) {
+        throw new Error('Phone number must be in the format +254XXXXXXXXX');
+      }
 
       console.log('📤 Sending registration request...');
       
@@ -187,7 +244,17 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('❌ Registration error:', error);
-      console.error('Response:', error.response?.data);
+      
+      // Log detailed error information
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+        console.error('Response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
       
       // Extract error messages from Django response
       let message = 'Registration failed';
@@ -197,30 +264,24 @@ export const AuthProvider = ({ children }) => {
         const responseData = error.response.data;
         console.log('Full error response:', responseData);
         
-        if (responseData.errors) {
-          // Format validation errors
-          errorDetails = responseData.errors;
-          const errorMessages = Object.entries(responseData.errors)
-            .map(([field, msgs]) => {
-              const msgArray = Array.isArray(msgs) ? msgs : [msgs];
-              return `${field}: ${msgArray.join(', ')}`;
-            });
-          message = errorMessages.join('\n');
+        if (typeof responseData === 'string') {
+          message = responseData;
         } else if (responseData.message) {
           message = responseData.message;
+        } else if (responseData.error) {
+          message = responseData.error;
         } else if (responseData.detail) {
           message = responseData.detail;
-        } else if (typeof responseData === 'object' && Object.keys(responseData).length > 0) {
-          // Handle DRF field-level errors
-          const errorMessages = Object.entries(responseData)
-            .map(([field, msgs]) => {
-              const msgArray = Array.isArray(msgs) ? msgs : [msgs];
-              return `${field}: ${msgArray.join(', ')}`;
-            });
-          message = errorMessages.join('\n');
+        } else if (responseData.errors) {
+          errorDetails = responseData.errors;
+          message = Object.entries(responseData.errors)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join('\n');
+        } else if (typeof responseData === 'object') {
           errorDetails = responseData;
-        } else {
-          message = String(responseData);
+          message = Object.entries(responseData)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join('\n');
         }
       }
       
@@ -233,12 +294,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const sendOTP = async (phoneNumber) => {
+  const sendOTP = async (recipient, method = 'sms') => {
     try {
-      console.log('📱 Sending OTP to:', phoneNumber);
-      const response = await api.post('/api/auth/send-otp/', {
-        phone_number: phoneNumber,
-      });
+      console.log(`� Sending OTP via ${method.toUpperCase()} to:`, recipient);
+      
+      const data = method === 'sms' 
+        ? { phone_number: recipient, method: 'sms' }
+        : { email: recipient, method: 'email' };
+      
+      const response = await api.post('/api/auth/send-otp/', data);
       
       if (response.data.success) {
         toast.success(response.data.message || 'OTP sent successfully!');
@@ -256,13 +320,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOTP = async (phoneNumber, otp) => {
+  const verifyOTP = async (recipient, otp, method = 'sms') => {
     try {
       console.log('🔐 Verifying OTP...');
-      const response = await api.post('/api/auth/verify-otp/', {
-        phone_number: phoneNumber,
+      console.log(`Method: ${method}, Recipient: ${recipient}`);
+      
+      const data = {
         otp_code: otp,
-      });
+        ...(method === 'sms' 
+          ? { phone_number: recipient, method: 'sms' }
+          : { email: recipient, method: 'email' }
+        )
+      };
+      
+      const response = await api.post('/api/auth/verify-otp/', data);
       
       if (response.data.success) {
         toast.success(response.data.message || 'Phone number verified successfully!');
@@ -317,12 +388,4 @@ export const AuthProvider = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

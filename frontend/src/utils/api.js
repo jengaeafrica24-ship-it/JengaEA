@@ -1,121 +1,109 @@
 import axios from 'axios';
 
-// CRITICAL: Force production API URL for consistency
-const API_BASE_URL = 'https://jengaea.onrender.com';
+const API_BASE_URL = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:8000'
+  : 'https://jengaea.onrender.com';
 
-// Debug logging
-console.log('🔧 API Configuration:');
-console.log('  API Base URL:', API_BASE_URL);
-console.log('  NODE_ENV:', process.env.NODE_ENV);
-console.log('  Running against production API');
-
-// Create axios instance with correct configuration
+// Create base API instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 120000, // 120 seconds for long operations
+  timeout: 120000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: false // Changed to false since we're using token auth
+  withCredentials: true
 });
 
-// Request interceptor - adds auth token
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    console.log('📤 API Request:');
-    console.log('  URL:', config.baseURL + config.url);
-    console.log('  Method:', config.method?.toUpperCase());
-    
-    // Add auth token from localStorage if it exists
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Token ${token}`;
-      console.log('  Auth Token: [PRESENT]');
     }
-    
-    if (config.data) {
-      console.log('  Request Data:', config.data);
-    }
-    
     return config;
   },
-  (error) => {
-    console.error('❌ Request Error:', error);
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor - handles responses and errors
+// Response interceptor
 api.interceptors.response.use(
-  (response) => {
-    console.log('✅ API Response:');
-    console.log('  Status:', response.status);
-    console.log('  Data:', response.data);
-    return response;
-  },
-  (error) => {
-    console.error('❌ API Error:');
-    
-    if (error.response) {
-      // Server responded with error status
-      console.error('  Status:', error.response.status);
-      console.error('  Status Text:', error.response.statusText);
-      console.error('  Data:', error.response.data);
-      console.error('  URL:', error.config?.url);
-      console.error('  Full URL:', error.config?.baseURL + error.config?.url);
-      
-      // Log common error explanations
-      switch (error.response.status) {
-        case 400:
-          console.error('  ⚠️ Bad Request - Check data format');
-          break;
-        case 401:
-          console.error('  ⚠️ Unauthorized - Token invalid or missing');
-          break;
-        case 403:
-          console.error('  ⚠️ Forbidden - Permission denied');
-          break;
-        case 404:
-          console.error('  ⚠️ Not Found - Endpoint does not exist');
-          console.error('  Check if this endpoint exists in Django urls.py');
-          break;
-        case 500:
-          console.error('  ⚠️ Server Error - Check Django logs on Render');
-          break;
-      }
-    } else if (error.request) {
-      // Request made but no response received
-      console.error('  ⚠️ No response from server');
-      console.error('  This could be a CORS issue or network problem');
-      console.error('  Request URL:', error.config?.baseURL + error.config?.url);
-      console.error('  Request Method:', error.config?.method);
-    } else {
-      // Error in request setup
-      console.error('  Error:', error.message);
-    }
-    
-    return Promise.reject(error);
-  }
+  (response) => response,
+  (error) => Promise.reject(error)
 );
 
-// Projects API utilities
-export const projectsAPI = {
-  getProjects: () => api.get('/api/projects/'),
-  getProject: (id) => api.get(`/api/projects/${id}/`),
-  createProject: (data) => api.post('/api/projects/', data),
-  updateProject: (id, data) => api.put(`/api/projects/${id}/`, data),
-  deleteProject: (id) => api.delete(`/api/projects/${id}/`),
+const createFormData = (data, file = null) => {
+  const formData = new FormData();
+  
+  // Add all data fields to FormData
+  Object.keys(data).forEach(key => {
+    if (data[key] !== null && data[key] !== undefined) {
+      formData.append(key, data[key]);
+    }
+  });
+  
+  // Add file if provided
+  if (file) {
+    formData.append('building_plan', file);
+  }
+  
+  return formData;
 };
 
-// Estimates API utilities
-export const estimatesAPI = {
-  getEstimates: () => api.get('/api/estimates/'),
+const projects = {
+  getProjectTypes: () => api.get('/api/projects/types/'),
+  getLocations: () => api.get('/api/locations/')
+};
+
+const estimates = {
+  getEstimates: (params) => api.get('/api/estimates/', { params }),
   getEstimate: (id) => api.get(`/api/estimates/${id}/`),
-  createEstimate: (data) => api.post('/api/estimates/', data),
-  updateEstimate: (id, data) => api.put(`/api/estimates/${id}/`, data),
+  createEstimate: (data, file = null) => {
+    const formData = createFormData(data, file);
+    return api.post('/api/estimates/upload/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+  updateEstimate: (id, data) => api.patch(`/api/estimates/${id}/`, data),
   deleteEstimate: (id) => api.delete(`/api/estimates/${id}/`),
+  checkEstimateStatus: (id) => api.get(`/api/estimates/tasks/${id}/`)
 };
 
-// Export the base API instance as default
-export default api;
+// AI-powered estimation endpoints
+const estimatesAPI = {
+  // Project Summary
+  getProjectSummary: (timeframe) => api.get(`/api/estimates/summary?timeframe=${timeframe}`),
+  generateMaterialEstimate: (data) => {
+    // If data is FormData, use multipart/form-data content type
+    const headers = data instanceof FormData 
+      ? { 'Content-Type': 'multipart/form-data' }
+      : { 'Content-Type': 'application/json' };
+    
+    return api.post('/api/estimates/materials/generate/', data, { headers });
+  },
+  generateLaborEstimate: (data) => api.post('/api/estimates/labor', data),
+  shareEstimate: (data) => api.post('/api/estimates/share', data),
+  
+  // AI Integration endpoints
+  generateAIEstimate: (data) => api.post('/api/ai/generate-estimate', data),
+  getAIRecommendations: (projectId) => api.get(`/api/ai/recommendations/${projectId}`),
+  getMarketAnalysis: (params) => api.get('/api/ai/market-analysis', { params }),
+  
+  // Project specific endpoints
+  saveEstimate: (projectId, data) => api.post(`/api/estimates/${projectId}`, data),
+  updateEstimate: (estimateId, data) => api.put(`/api/estimates/${estimateId}`, data),
+  // History
+  getEstimateHistory: (projectId) => api.get(`/api/estimates/history/${projectId}`),
+};
+
+// Export all APIs
+export {
+  api as default,
+  createFormData,
+  estimates,
+  estimatesAPI,
+  projects
+};

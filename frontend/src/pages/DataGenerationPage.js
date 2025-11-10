@@ -10,8 +10,7 @@ const DataGenerationPage = () => {
     const [generatedData, setGeneratedData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    // ...existing code...
-    const { token } = useAuth();
+    const { user } = useAuth(); // Using user instead of token directly
     
     // Construction-specific state
     const [adjustmentFactors, setAdjustmentFactors] = useState({

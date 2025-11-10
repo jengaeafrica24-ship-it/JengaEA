@@ -4,7 +4,8 @@ import { Calculator, Loader2, Sparkles, Upload, FileText, X } from 'lucide-react
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
-import { estimatesAPI, projectsAPI } from '../utils/api';
+import * as estimatesAPI from '../services/estimates';
+import * as projectsAPI from '../services/projects';
 import { toast } from 'react-hot-toast';
 import { cn } from '../utils/helpers';
 
