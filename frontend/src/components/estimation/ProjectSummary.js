@@ -221,19 +221,33 @@ const ProjectSummary = () => {
                   </div>
                 ))
               ) : summaryData.projectHealth ? (
-                Object.entries(summaryData.projectHealth).map(([metric, { icon: MetricIcon, value, status }]) => (
-                  <div key={metric} className="flex items-center justify-between p-3 bg-blue-900/20 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <MetricIcon className="w-4 h-4 text-blue-400" />
-                      <span className="text-blue-300">{metric}</span>
+                Object.entries(summaryData.projectHealth).map(([metric, { value, status }]) => {
+                  // Map metric names to icons
+                  const getIcon = (metricName) => {
+                    const iconMap = {
+                      'Budget Status': DollarSign,
+                      'Material Allocation': Package2,
+                      'Labor Allocation': Users,
+                      'Time Status': Clock,
+                    };
+                    return iconMap[metricName] || Activity;
+                  };
+                  const MetricIcon = getIcon(metric);
+                  
+                  return (
+                    <div key={metric} className="flex items-center justify-between p-3 bg-blue-900/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <MetricIcon className="w-4 h-4 text-blue-400" />
+                        <span className="text-blue-300">{metric}</span>
+                      </div>
+                      <span className={
+                        status === 'good' ? 'text-green-400' :
+                        status === 'warning' ? 'text-yellow-400' :
+                        'text-red-400'
+                      }>{value}</span>
                     </div>
-                    <span className={
-                      status === 'good' ? 'text-green-400' :
-                      status === 'warning' ? 'text-yellow-400' :
-                      'text-red-400'
-                    }>{value}</span>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-blue-300/60 text-center py-4">No health data available</div>
               )}

@@ -7,6 +7,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 import json
 import logging
+import os
 
 from ..models import Estimate, AIEstimate
 from ..serializers import EstimateSerializer
@@ -16,7 +17,7 @@ from projects.models import ProjectType, Location
 logger = logging.getLogger(__name__)
 
 # Configure Gemini API with proper model
-genai.configure(api_key='AIzaSyDPVIy7kLzBE5-mUVn3Dy82QtekeT6QLvA')
+genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
 # Try to use the latest model, fall back if not available
 try:

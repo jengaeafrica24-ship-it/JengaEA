@@ -4,7 +4,7 @@ from .views import (
     calculate_cost, save_estimate, duplicate_estimate, share_estimate,
     shared_estimate, estimate_statistics, create_estimate_with_gemini,
     create_estimate_with_gemini_async, estimate_task_status,
-    generate_material_estimate
+    generate_material_estimate, get_project_summary, get_market_analysis
 )
 from .views.sharing import share_material_estimate
 from .views.upload import EstimateUploadView
@@ -14,6 +14,8 @@ urlpatterns = [
     # Estimate CRUD
     path('', EstimateListView.as_view(), name='estimate_list'),
     path('summaries/', EstimateSummaryListView.as_view(), name='estimate_summaries'),
+    path('summary', get_project_summary, name='project_summary'),
+    path('market-analysis', get_market_analysis, name='market_analysis'),
     path('<int:pk>/', EstimateDetailView.as_view(), name='estimate_detail'),
     
     # Estimate operations

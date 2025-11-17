@@ -2,7 +2,6 @@
 Middleware to log all incoming requests for debugging
 """
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -47,31 +46,7 @@ class RequestLoggingMiddleware:
         
         # Log response
         print(f"[MIDDLEWARE] RESPONSE: {response.status_code} for {request.method} {request.path}")
-
-        # Ensure CORS headers are present for development if not already set by corsheaders
-        try:
-            origin = request.META.get('HTTP_ORIGIN')
-            # If the CORS middleware didn't set headers, inject safe development defaults
-            if not response.get('Access-Control-Allow-Origin'):
-                if origin:
-                    response['Access-Control-Allow-Origin'] = origin
-                else:
-                    response['Access-Control-Allow-Origin'] = '*'
-
-            if not response.get('Access-Control-Allow-Methods'):
-                response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-
-            if not response.get('Access-Control-Allow-Headers'):
-                # Prefer the request's requested headers where possible
-                req_hdrs = request.META.get('HTTP_ACCESS_CONTROL_REQUEST_HEADERS')
-                response['Access-Control-Allow-Headers'] = req_hdrs if req_hdrs else 'Authorization, Content-Type'
-
-            if not response.get('Access-Control-Allow-Credentials'):
-                response['Access-Control-Allow-Credentials'] = 'true'
-        except Exception as e:
-            # Don't break response logging if header injection fails
-            logger.debug('Failed to inject CORS headers: %s', e)
-
+        
         # Log CORS headers in response
         if hasattr(response, 'headers'):
             cors_origin = response.get('Access-Control-Allow-Origin', 'Not set')

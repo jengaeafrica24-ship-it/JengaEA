@@ -90,7 +90,7 @@ const estimatesAPI = {
   // AI Integration endpoints
   generateAIEstimate: (data) => api.post('/api/ai/generate-estimate', data),
   getAIRecommendations: (projectId) => api.get(`/api/ai/recommendations/${projectId}`),
-  getMarketAnalysis: (params) => api.get('/api/ai/market-analysis', { params }),
+  getMarketAnalysis: (timeframe = 'month') => api.get('/api/estimates/market-analysis', { params: { timeframe } }),
   
   // Project specific endpoints
   saveEstimate: (projectId, data) => api.post(`/api/estimates/${projectId}`, data),

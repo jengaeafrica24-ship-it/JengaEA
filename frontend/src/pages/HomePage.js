@@ -1,4 +1,6 @@
 import React from 'react';
+import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 import HeroSection from '../components/sections/HeroSection';
 import FeaturesSection from '../components/sections/FeaturesSection';
 import HowItWorksSection from '../components/sections/HowItWorksSection';
@@ -7,7 +9,8 @@ import Carousel2 from '../components/common/Carousel2';
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-blue-950 to-blue-900">
-      <div className="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/10 via-blue-900/5 to-transparent">
+      <Navbar />
+      <div className="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/10 via-blue-900/5 to-transparent flex-1">
         <HeroSection />
         {/* Image carousel with actual African construction images */}
         <div className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8">
@@ -50,6 +53,7 @@ export default function HomePage() {
         <FeaturesSection />
         <HowItWorksSection />
       </div>
+      <Footer />
     </div>
   );
 }

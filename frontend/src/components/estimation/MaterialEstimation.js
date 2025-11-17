@@ -614,15 +614,7 @@ function MaterialEstimation() {
           </motion.div>
         )}
         
-        {/* Debug Information - Remove in production */}
-        {estimate && (
-          <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-            <p className="text-sm text-gray-600">Debug - Estimate Data:</p>
-            <pre className="mt-2 text-xs overflow-auto">
-              {JSON.stringify(estimate, null, 2)}
-            </pre>
-          </div>
-        )}
+        {/* Debug Information removed to avoid showing raw JSON on the page */}
       </motion.div>
     </div>
   );
