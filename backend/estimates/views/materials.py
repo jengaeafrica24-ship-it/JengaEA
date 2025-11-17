@@ -34,7 +34,7 @@ def generate_prompt(data, area_data):
     """Generate a structured prompt for the Gemini AI model."""
     
     total_area = area_data.get('total', '0')
-    area_units = area_data.get('units', 'square_km')
+    area_units = area_data.get('units', 'square_m')
     
     project_info = f"""
     Project Information:
@@ -290,9 +290,9 @@ def generate_material_estimate(request):
         if building_plan:
             logger.info(f"Building plan file uploaded: {building_plan.name}")
         
-        # Store area as provided (don't convert to square meters)
-        # The user's input is already in their preferred units
-        area_units = area_data.get('units', 'square_km')
+        # Store area as provided (in square meters)
+        # The user's input is already in square meters
+        area_units = area_data.get('units', 'square_m')
         
         # Store the area value directly without conversion
         # This prevents numeric overflow for large areas

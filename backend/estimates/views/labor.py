@@ -66,7 +66,7 @@ def generate_labor_prompt(data, area_data):
     """Generate a structured prompt for the Gemini AI model."""
     
     total_area = area_data.get('total', '0')
-    area_units = area_data.get('units', 'square_km')
+    area_units = area_data.get('units', 'square_m')
     
     project_info = f"""
     Project Information:

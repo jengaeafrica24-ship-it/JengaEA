@@ -124,7 +124,7 @@ function MaterialEstimation() {
     specifications: '',
     area: {
       total: '',
-      units: 'square_km',
+      units: 'square_m',
     },
   });
   const [estimate, setEstimate] = useState(null);
@@ -186,7 +186,7 @@ function MaterialEstimation() {
           projectType: formData.projectType,
           buildingType: formData.buildingType,
           constructionPhase: formData.constructionPhase,
-          area: formData.area.total + ' km²',
+          area: formData.area.total + ' m²',
         },
         materials: estimate.materials,
         costs: {
@@ -237,7 +237,7 @@ function MaterialEstimation() {
             projectType: formData.projectType,
             buildingType: formData.buildingType,
             constructionPhase: formData.constructionPhase,
-            area: formData.area.total + ' km²',
+            area: formData.area.total + ' m²',
           },
         }
       });
@@ -513,7 +513,7 @@ function MaterialEstimation() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Total Area (square kilometers)
+                    Total Area (square meters)
                   </label>
                   <div className="flex items-center gap-4">
                     <input
@@ -524,10 +524,10 @@ function MaterialEstimation() {
                       placeholder="Enter total area"
                       className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
-                    <span className="text-gray-600 text-sm">km²</span>
+                    <span className="text-gray-600 text-sm">m²</span>
                   </div>
                   <p className="mt-2 text-sm text-gray-500">
-                    Enter the total area of your project in square kilometers
+                    Enter the total area of your project in square meters
                   </p>
                 </div>
               </div>

@@ -22,7 +22,7 @@ const LaborEstimation = () => {
     project_name: '',
     construction_type: 'new_construction',
     data_period: 'Q4',
-    area: { total: '', units: 'square_km' }
+    area: { total: '', units: 'square_m' }
   });
 
   const onDrop = useCallback((acceptedFiles) => {
@@ -275,7 +275,7 @@ const LaborEstimation = () => {
                 </div>
 
                 <div>
-                  <label className="block text-blue-300 mb-2 text-sm">Area (in square km)</label>
+                  <label className="block text-blue-300 mb-2 text-sm">Area (in square meters)</label>
                   <Input
                     type="number"
                     name="area.total"
