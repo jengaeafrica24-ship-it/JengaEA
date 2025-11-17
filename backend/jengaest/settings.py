@@ -52,7 +52,13 @@ else:
     CORS_ALLOWED_ORIGINS = [
         "https://jengaea.onrender.com",
         "https://jengaeafrontend.onrender.com",
+        "https://www.jengaea.onrender.com",
+        "https://www.jengaeafrontend.onrender.com",
     ]
+    # Add additional origins from environment variable if provided
+    extra_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
+    if extra_origins:
+        CORS_ALLOWED_ORIGINS.extend([o.strip() for o in extra_origins.split(',') if o.strip()])
 
 # CRITICAL: Must be True when using withCredentials: true in axios
 CORS_ALLOW_CREDENTIALS = True
@@ -97,6 +103,8 @@ else:
     CSRF_TRUSTED_ORIGINS = [
         'https://jengaea.onrender.com',
         'https://jengaeafrontend.onrender.com',
+        'https://www.jengaea.onrender.com',
+        'https://www.jengaeafrontend.onrender.com',
     ]
     # Allow additional origins from environment variable
     csrf_origins_str = os.getenv('CSRF_TRUSTED_ORIGINS', '')
@@ -261,7 +269,7 @@ AUTHENTICATION_BACKENDS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # SessionAuthentication removed to avoid CSRF issues with token-based API
     ], 
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',

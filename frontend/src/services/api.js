@@ -41,10 +41,13 @@ api.interceptors.request.use(
       config.headers.Authorization = `Token ${token}`;
     }
     
-    // Add CSRF token from cookie
-    const csrfToken = Cookies.get('csrftoken') || getCSRFTokenFromCookie();
-    if (csrfToken) {
-      config.headers['X-CSRFToken'] = csrfToken;
+    // Only add CSRF token for non-auth endpoints
+    // Registration and login are csrf_exempt
+    if (!config.url.includes('/auth/register') && !config.url.includes('/auth/login')) {
+      const csrfToken = Cookies.get('csrftoken') || getCSRFTokenFromCookie();
+      if (csrfToken) {
+        config.headers['X-CSRFToken'] = csrfToken;
+      }
     }
     
     return config;
