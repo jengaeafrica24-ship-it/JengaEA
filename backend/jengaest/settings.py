@@ -114,6 +114,8 @@ CSRF_COOKIE_HTTPONLY = False       # Required for JavaScript to read CSRF token
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_NAME = 'csrftoken'
 SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_AGE = 31449600         # 1 year in seconds
+CSRF_COOKIE_PATH = '/'             # Available to all paths
 
 # Application definition
 INSTALLED_APPS = [

@@ -3,6 +3,23 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+// Function to get CSRF token from cookie
+const getCSRFTokenFromCookie = () => {
+  const name = 'csrftoken';
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+};
+
 // Create axios instance
 const api = axios.create({
   baseURL: process.env.NODE_ENV === 'development'
@@ -11,6 +28,7 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   }
 });
 
@@ -93,8 +111,14 @@ export const AuthProvider = ({ children }) => {
           config.headers.Authorization = `Token ${token}`;
         }
         
-        // Add CSRF token if available
-        const csrfToken = Cookies.get('csrftoken');
+        // Add CSRF token from cookie or get it fresh
+        let csrfToken = Cookies.get('csrftoken') || getCSRFTokenFromCookie();
+        
+        // If no CSRF token found, try to get it from the API
+        if (!csrfToken && config.method !== 'get') {
+          csrfToken = getCSRFTokenFromCookie();
+        }
+        
         if (csrfToken) {
           config.headers['X-CSRFToken'] = csrfToken;
         }
@@ -102,6 +126,23 @@ export const AuthProvider = ({ children }) => {
         return config;
       },
       (error) => Promise.reject(error)
+    );
+    
+    // Response interceptor for better error handling
+    api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        // Handle 403 CSRF errors
+        if (error.response?.status === 403 && error.response?.data?.detail?.includes('CSRF')) {
+          console.log('🔄 CSRF token error, attempting to get fresh token...');
+          // Try to get a fresh CSRF token
+          return api.get('/api/auth/csrf/').then(() => {
+            // Retry the original request
+            return api.request(error.config);
+          }).catch((err) => Promise.reject(err));
+        }
+        return Promise.reject(error);
+      }
     );
   }, []);
 
@@ -120,9 +161,21 @@ export const AuthProvider = ({ children }) => {
   // Get CSRF token before making auth requests
   const getCSRFToken = async () => {
     try {
-      await api.get('/api/auth/csrf/');
+      const response = await api.get('/api/auth/csrf/');
+      // Django should set the cookie in the response
+      const token = getCSRFTokenFromCookie();
+      if (token) {
+        api.defaults.headers['X-CSRFToken'] = token;
+      }
+      return token;
     } catch (error) {
       console.error('Error getting CSRF token:', error);
+      // Try to get from cookie anyway
+      const token = getCSRFTokenFromCookie();
+      if (token) {
+        api.defaults.headers['X-CSRFToken'] = token;
+      }
+      return token;
     }
   };
 
