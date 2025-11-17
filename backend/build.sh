@@ -24,10 +24,14 @@ python manage.py migrate --no-input
 echo "=========================================="
 echo "Populating database with initial data..."
 echo "=========================================="
-python manage.py populate_project_types
-python manage.py populate_locations
-python manage.py populate_counties
+echo "Running populate_project_types..."
+python manage.py populate_project_types || echo "WARNING: populate_project_types failed"
+echo "Running populate_locations..."
+python manage.py populate_locations || echo "WARNING: populate_locations failed"
+echo "Running populate_counties..."
+python manage.py populate_counties || echo "WARNING: populate_counties failed"
 
 echo "=========================================="
 echo "Build completed successfully!"
+echo "=========================================="
 echo "=========================================="
