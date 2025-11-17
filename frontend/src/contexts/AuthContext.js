@@ -1,36 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-
-// Function to get CSRF token from cookie
-const getCSRFTokenFromCookie = () => {
-  const name = 'csrftoken';
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-};
-
-// Create axios instance
-const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000'
-    : 'https://jengaea.onrender.com',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
-  }
-});
+import api, { getCSRFToken } from '../services/api'; // Import the shared API instance
 
 // Create the context
 const AuthContext = createContext();
@@ -100,84 +70,16 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Set up axios defaults
-  // Add interceptor for CSRF token
-  useEffect(() => {
-    api.interceptors.request.use(
-      (config) => {
-        // Add auth token if available
-        const token = localStorage.getItem('token');
-        if (token) {
-          config.headers.Authorization = `Token ${token}`;
-        }
-        
-        // Add CSRF token from cookie or get it fresh
-        let csrfToken = Cookies.get('csrftoken') || getCSRFTokenFromCookie();
-        
-        // If no CSRF token found, try to get it from the API
-        if (!csrfToken && config.method !== 'get') {
-          csrfToken = getCSRFTokenFromCookie();
-        }
-        
-        if (csrfToken) {
-          config.headers['X-CSRFToken'] = csrfToken;
-        }
-        
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-    
-    // Response interceptor for better error handling
-    api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        // Handle 403 CSRF errors
-        if (error.response?.status === 403 && error.response?.data?.detail?.includes('CSRF')) {
-          console.log('🔄 CSRF token error, attempting to get fresh token...');
-          // Try to get a fresh CSRF token
-          return api.get('/api/auth/csrf/').then(() => {
-            // Retry the original request
-            return api.request(error.config);
-          }).catch((err) => Promise.reject(err));
-        }
-        return Promise.reject(error);
-      }
-    );
-  }, []);
-
   // Check for existing token on mount
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      api.defaults.headers.common['Authorization'] = `Token ${token}`;
       // Verify token and get user data
       verifyToken();
     } else {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, []);
-
-  // Get CSRF token before making auth requests
-  const getCSRFToken = async () => {
-    try {
-      const response = await api.get('/api/auth/csrf/');
-      // Django should set the cookie in the response
-      const token = getCSRFTokenFromCookie();
-      if (token) {
-        api.defaults.headers['X-CSRFToken'] = token;
-      }
-      return token;
-    } catch (error) {
-      console.error('Error getting CSRF token:', error);
-      // Try to get from cookie anyway
-      const token = getCSRFTokenFromCookie();
-      if (token) {
-        api.defaults.headers['X-CSRFToken'] = token;
-      }
-      return token;
-    }
-  };
 
   const verifyToken = async () => {
     try {
@@ -191,7 +93,6 @@ export const AuthProvider = ({ children }) => {
       });
     } catch (error) {
       localStorage.removeItem('token');
-      delete api.defaults.headers.common['Authorization'];
       dispatch({ type: 'LOGIN_FAILURE' });
     }
   };
@@ -208,7 +109,6 @@ export const AuthProvider = ({ children }) => {
         const { token, user } = response.data;
         
         localStorage.setItem('token', token);
-        api.defaults.headers.common['Authorization'] = `Token ${token}`;
         
         dispatch({
           type: 'LOGIN_SUCCESS',
@@ -244,7 +144,6 @@ export const AuthProvider = ({ children }) => {
       // Get CSRF token first
       await getCSRFToken();
       
-      // Log the API URL being used
       console.log('🔗 Using API URL:', api.defaults.baseURL);
       console.log('📋 Registration data:', {
         ...userData,
@@ -349,7 +248,7 @@ export const AuthProvider = ({ children }) => {
 
   const sendOTP = async (recipient, method = 'sms') => {
     try {
-      console.log(`� Sending OTP via ${method.toUpperCase()} to:`, recipient);
+      console.log(`📱 Sending OTP via ${method.toUpperCase()} to:`, recipient);
       
       const data = method === 'sms' 
         ? { phone_number: recipient, method: 'sms' }
@@ -411,7 +310,6 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
-      delete api.defaults.headers.common['Authorization'];
       dispatch({ type: 'LOGOUT' });
       toast.success('Logged out successfully!');
     }
