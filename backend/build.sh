@@ -22,5 +22,12 @@ echo "=========================================="
 python manage.py migrate --no-input
 
 echo "=========================================="
+echo "Populating database with initial data..."
+echo "=========================================="
+python manage.py populate_project_types
+python manage.py populate_locations
+python manage.py populate_counties
+
+echo "=========================================="
 echo "Build completed successfully!"
 echo "=========================================="
