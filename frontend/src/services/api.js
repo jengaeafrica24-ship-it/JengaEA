@@ -20,9 +20,11 @@ const getCSRFTokenFromCookie = () => {
 
 // Create single axios instance to be used throughout the app
 const api = axios.create({
-  baseURL: process.env.NODE_ENV === 'development'
-    ? 'http://localhost:8000'
-    : 'https://jengaea.onrender.com',
+  baseURL: process.env.REACT_APP_API_URL || (
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:8000'
+      : 'https://jengaea.onrender.com'
+  ),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

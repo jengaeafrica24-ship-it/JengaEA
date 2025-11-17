@@ -117,6 +117,24 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_AGE = 31449600         # 1 year in seconds
 CSRF_COOKIE_PATH = '/'             # Available to all paths
 
+# CRITICAL FIX: Don't set CSRF_COOKIE_DOMAIN in production
+# Let the browser handle the domain automatically
+# This prevents cross-subdomain issues on Render
+if DEBUG:
+    CSRF_COOKIE_DOMAIN = None  # Default behavior for localhost
+else:
+    # Leave CSRF_COOKIE_DOMAIN unset for production
+    # This allows cookies to work with the exact domain they're set from
+    pass
+
+# Additional security headers for production
+if not DEBUG:
+    # These settings help with CORS and CSRF in production
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = None  # Allows cross-origin requests
+    
+# Trust the Render proxy
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
