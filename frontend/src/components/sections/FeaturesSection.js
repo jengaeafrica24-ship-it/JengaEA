@@ -54,14 +54,14 @@ const features = [
 ];
 
 const FeatureCard = ({ Icon, title, description }) => (
-  <div className="p-5 sm:p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
-    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-2.5 mb-3 sm:mb-4">
+  <div className="group p-5 sm:p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-slate-700/50 hover:border-orange-500/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/20">
+    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl p-3 mb-4 group-hover:scale-110 transition-transform duration-300">
       <Icon className="w-full h-full text-white" />
     </div>
-    <h3 className="text-base sm:text-lg font-semibold text-white mb-2">
+    <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white mb-2 sm:mb-3">
       {title}
     </h3>
-    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+    <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
       {description}
     </p>
   </div>
@@ -69,18 +69,18 @@ const FeatureCard = ({ Icon, title, description }) => (
 
 const FeaturesSection = () => {
   return (
-    <section className="py-12 sm:py-16 md:py-20 lg:py-24 bg-slate-900">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-24 bg-slate-900">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-16">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-200 via-amber-200 to-yellow-200 mb-4 sm:mb-6 px-4">
             Powerful Features for Modern Construction
           </h2>
-          <p className="text-slate-400 text-base sm:text-lg md:text-xl px-4">
+          <p className="text-slate-400 text-sm sm:text-base md:text-lg lg:text-xl px-4 leading-relaxed">
             Everything you need to create accurate construction estimates, backed by real-time data and advanced technology.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
           {features.map((feature, index) => (
             <FeatureCard key={index} {...feature} />
           ))}

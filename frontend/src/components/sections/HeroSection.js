@@ -40,8 +40,8 @@ const HeroSection = () => (
 
     {/* Content with staggered animations */}
     <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20 lg:py-28 text-center">
-      {/* Animated heading with gradient text */}
-      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+      {/* Animated heading with gradient text - Fully responsive */}
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight px-2">
         <span className="block animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
           Make construction estimates
         </span>
@@ -57,22 +57,22 @@ const HeroSection = () => (
         </span>
       </h1>
       
-      {/* Animated description */}
+      {/* Animated description - Responsive text sizing */}
       <p 
-        className="mt-4 sm:mt-6 text-base sm:text-lg md:text-xl lg:text-2xl text-slate-200 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed px-4 animate-fadeInUp"
+        className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-slate-200 max-w-xl sm:max-w-2xl md:max-w-3xl mx-auto leading-relaxed px-4 animate-fadeInUp"
         style={{ animationDelay: '0.6s' }}
       >
         Accurate, fast, and collaborative estimating tools built for East African contractors. Start your free trial and transform how you bid on construction projects across Kenya, Tanzania, Uganda, and Rwanda.
       </p>
 
-      {/* Animated CTA buttons */}
+      {/* Animated CTA buttons - 44px minimum height for mobile touch */}
       <div 
         className="mt-8 sm:mt-10 md:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4 animate-fadeInUp"
         style={{ animationDelay: '0.8s' }}
       >
         <Link
           to="/register"
-          className="group relative w-full sm:w-auto rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-semibold text-white overflow-hidden transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl hover:shadow-orange-500/50"
+          className="group relative w-full sm:w-auto min-h-[44px] rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-semibold text-white overflow-hidden transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-2xl hover:shadow-orange-500/50 flex items-center justify-center"
         >
           {/* Animated shine effect */}
           <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
@@ -88,18 +88,18 @@ const HeroSection = () => (
 
         <Link 
           to="/features" 
-          className="group w-full sm:w-auto text-sm sm:text-base md:text-lg font-medium text-white hover:text-orange-400 transition-all duration-300 flex items-center justify-center gap-2 relative"
+          className="group w-full sm:w-auto min-h-[44px] text-sm sm:text-base md:text-lg font-medium text-white hover:text-orange-400 transition-all duration-300 flex items-center justify-center gap-2 relative px-4 py-3"
         >
           <span className="relative z-10">Learn more</span>
-          <span className="hidden sm:inline relative z-10 transition-transform duration-300 group-hover:translate-x-1">→</span>
+          <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">→</span>
           
           {/* Underline animation */}
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-full" />
+          <span className="absolute bottom-2 left-4 right-4 w-0 h-0.5 bg-orange-400 transition-all duration-300 group-hover:w-[calc(100%-2rem)]" />
         </Link>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden sm:block">
+      {/* Scroll indicator - Hidden on small mobile devices */}
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden md:block">
         <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2">
           <div className="w-1.5 h-1.5 bg-white/50 rounded-full animate-scroll-down" />
         </div>

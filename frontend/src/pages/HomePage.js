@@ -5,15 +5,16 @@ import HeroSection from '../components/sections/HeroSection';
 import FeaturesSection from '../components/sections/FeaturesSection';
 import HowItWorksSection from '../components/sections/HowItWorksSection';
 import Carousel2 from '../components/common/Carousel2';
+import ScrollToTop from '../components/common/ScrollToTop';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-blue-950 to-blue-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-black via-blue-950 to-blue-900 overflow-x-hidden">
       <Navbar />
       <div className="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/10 via-blue-900/5 to-transparent flex-1">
         <HeroSection />
         {/* Image carousel with actual African construction images */}
-        <div className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="py-8 sm:py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8">
           <Carousel2
             autoplayInterval={5000}
             slides={[
@@ -54,6 +55,7 @@ export default function HomePage() {
         <HowItWorksSection />
       </div>
       <Footer />
+      <ScrollToTop />
     </div>
   );
 }

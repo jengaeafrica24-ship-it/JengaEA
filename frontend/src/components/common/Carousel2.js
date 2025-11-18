@@ -111,14 +111,15 @@ export default function Carousel2({ slides, autoplayInterval = 4500 }) {
       {/* Visually hidden live region for screen readers */}
       <div className="sr-only" aria-live="polite" ref={liveRef} />
 
-      <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] xl:h-[600px]">
+      {/* Carousel container with aspect ratio for responsive images */}
+      <div className="relative h-56 sm:h-80 md:h-96 lg:h-[500px] xl:h-[600px] w-full overflow-hidden">
         <div
           className="absolute inset-0 flex transition-transform duration-500 ease-out"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {effectiveSlides.map((slide, i) => (
             <div key={i} className="w-full flex-shrink-0 relative">
-              {/* Use img for lazy-loading and better semantics */}
+              {/* Use img for lazy-loading with aspect-video */}
               <img
                 src={slide.image}
                 alt={slide.title || `Slide ${i + 1}`}
@@ -129,11 +130,11 @@ export default function Carousel2({ slides, autoplayInterval = 4500 }) {
               <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60" />
               <div className="relative z-10 h-full flex items-center justify-center text-white">
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                  {slide.title && <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 px-4">{slide.title}</h2>}
+                  {slide.title && <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold mb-2 sm:mb-3 px-4">{slide.title}</h2>}
                   {slide.description && <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white/90 leading-relaxed px-4">{slide.description}</p>}
                   {slide.cta && (
                     <div className="mt-4 sm:mt-6">
-                      <a href={slide.cta.href || '#'} className="inline-block bg-gradient-to-r from-orange-500 to-amber-500 px-5 sm:px-6 py-2 sm:py-3 rounded-lg text-white text-sm sm:text-base font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 transform hover:scale-105">
+                      <a href={slide.cta.href || '#'} className="inline-block min-h-[44px] bg-gradient-to-r from-orange-500 to-amber-500 px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg text-white text-sm sm:text-base font-semibold hover:from-orange-600 hover:to-amber-600 transition-all duration-300 transform hover:scale-105">
                         {slide.cta.label || 'Learn more'}
                       </a>
                     </div>
@@ -144,32 +145,34 @@ export default function Carousel2({ slides, autoplayInterval = 4500 }) {
           ))}
         </div>
 
+        {/* Navigation arrows - 44x44px minimum touch targets */}
         <button
           onClick={prev}
           aria-label="Previous slide"
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-300 hover:scale-110"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-transparent"
         >
-          <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         <button
           onClick={next}
           aria-label="Next slide"
-          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-300 hover:scale-110"
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-transparent"
         >
-          <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-3 sm:bottom-4 z-20 flex gap-2">
+        {/* Dot indicators - Touch-friendly sizing */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-3 sm:bottom-4 z-20 flex gap-2 sm:gap-2.5">
           {effectiveSlides.map((_, i) => (
             <button
               key={i}
               aria-label={`Go to slide ${i + 1}`}
               aria-current={i === current}
               onClick={() => goTo(i)}
-              className={`rounded-full transition-all duration-300 ${
+              className={`rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-transparent ${
                 i === current 
-                  ? 'bg-white w-8 h-2.5 sm:w-10 sm:h-3' 
-                  : 'bg-white/50 hover:bg-white/70 w-2.5 h-2.5 sm:w-3 sm:h-3'
+                  ? 'bg-white w-8 sm:w-10 h-3 sm:h-3.5' 
+                  : 'bg-white/50 hover:bg-white/70 min-w-[12px] min-h-[12px] w-3 h-3 sm:w-3.5 sm:h-3.5'
               }`}
             />
           ))}
