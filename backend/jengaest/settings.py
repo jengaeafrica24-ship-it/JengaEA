@@ -26,7 +26,10 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'jengaea.onrender.com',
-    'jengaeafrontend.onrender.com'
+    'jengaeafrontend.onrender.com',
+    'jengaeafrica.com',
+    'www.jengaeafrica.com',
+    'api.jengaeafrica.com',
 ]
 
 # Add Render hostname if present
@@ -54,6 +57,9 @@ else:
         "https://jengaeafrontend.onrender.com",
         "https://www.jengaea.onrender.com",
         "https://www.jengaeafrontend.onrender.com",
+        "https://jengaeafrica.com",
+        "https://www.jengaeafrica.com",
+        "https://api.jengaeafrica.com",
     ]
     # Add additional origins from environment variable if provided
     extra_origins = os.getenv('CORS_ALLOWED_ORIGINS', '')
@@ -105,6 +111,9 @@ else:
         'https://jengaeafrontend.onrender.com',
         'https://www.jengaea.onrender.com',
         'https://www.jengaeafrontend.onrender.com',
+        'https://jengaeafrica.com',
+        'https://www.jengaeafrica.com',
+        'https://api.jengaeafrica.com',
     ]
     # Allow additional origins from environment variable
     csrf_origins_str = os.getenv('CSRF_TRUSTED_ORIGINS', '')
