@@ -361,56 +361,58 @@ function MaterialEstimation() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-4 sm:space-y-6 md:space-y-8"
       >
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+        {/* Header - Responsive */}
+        <div className="text-center px-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
             Material Cost Estimation
           </h1>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-xs sm:text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
             Generate accurate material cost estimates using AI or manual entry
           </p>
         </div>
 
-        {/* Estimation Type Selection */}
-        <div className="flex justify-center gap-4">
+        {/* Estimation Type Selection - Responsive */}
+        <div className="flex justify-center gap-2 sm:gap-4 px-2">
           <button
             onClick={() => setEstimationType('manual')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-lg transition-all text-sm sm:text-base min-h-[44px] ${
               estimationType === 'manual'
                 ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300'
             }`}
           >
-            <FileText className="w-5 h-5" />
-            Manual Entry
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Manual Entry</span>
+            <span className="xs:hidden">Manual</span>
           </button>
           <button
             onClick={() => setEstimationType('upload')}
-            className={`flex items-center gap-2 px-6 py-3 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 md:px-6 py-2.5 sm:py-3 rounded-lg transition-all text-sm sm:text-base min-h-[44px] ${
               estimationType === 'upload'
                 ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 active:bg-gray-300'
             }`}
           >
-            <Upload className="w-5 h-5" />
-            Upload Plan
+            <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden xs:inline">Upload Plan</span>
+            <span className="xs:hidden">Upload</span>
           </button>
         </div>
 
-        {/* Main Form */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-          <div className="space-y-4 sm:space-y-5 md:space-y-6">
+        {/* Main Form - Responsive Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6 lg:gap-8">
+          <div className="space-y-4 sm:space-y-5">
             {/* Location Selection */}
             <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Map className="w-4 h-4 inline-block mr-2" />
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                <Map className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1.5 sm:mr-2" />
                 Location
               </label>
               <select
                 name="location"
                 value={formData.location}
                 onChange={handleInputChange}
-                className="w-full p-2 sm:p-2.5 md:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white"
               >
                 <option value="">Select Location</option>
                 {locations.map(location => (
@@ -423,15 +425,15 @@ function MaterialEstimation() {
 
             {/* Project Type Selection */}
             <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Building2 className="w-4 h-4 inline-block mr-2" />
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1.5 sm:mr-2" />
                 Project Type
               </label>
               <select
                 name="projectType"
                 value={formData.projectType}
                 onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full p-2.5 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px] bg-white"
               >
                 <option value="">Select Project Type</option>
                 {projectTypes.map(type => (
@@ -445,8 +447,8 @@ function MaterialEstimation() {
             {/* Building Type Selection */}
             {formData.projectType && (
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Building2 className="w-4 h-4 inline-block mr-2" />
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                  <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 inline-block mr-1.5 sm:mr-2" />
                   Building Type
                 </label>
                 <select
@@ -576,38 +578,38 @@ function MaterialEstimation() {
           />
         </div>
 
-        {/* Generate Button */}
-        <div className="flex justify-center">
+        {/* Generate Button - Responsive */}
+        <div className="flex justify-center px-2">
           <button
             onClick={generateEstimate}
             disabled={isLoading}
-            className="flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+            className="flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base font-medium min-h-[44px] w-full sm:w-auto max-w-sm shadow-lg"
           >
             {isLoading ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Generating Estimate...
+                <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                <span>Generating...</span>
               </>
             ) : (
               <>
-                <Calculator className="w-5 h-5" />
-                Generate Estimate
+                <Calculator className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Generate Estimate</span>
               </>
             )}
           </button>
         </div>
 
-        {/* Results Section */}
+        {/* Results Section - Responsive */}
         {estimate && (
           <motion.div
             id="results-section"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-8"
+            className="mt-6 sm:mt-8"
           >
-            <div className="bg-white rounded-lg shadow-lg">
-              <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-6">Estimate Results</h2>
+            <div className="bg-white rounded-lg md:rounded-xl shadow-lg overflow-hidden">
+              <div className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6">Estimate Results</h2>
                 <CostSummary estimateData={estimate} />
               </div>
             </div>

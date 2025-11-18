@@ -76,29 +76,29 @@ const ProjectSummary = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`bg-gradient-to-br from-blue-900/40 to-blue-950/60 backdrop-blur-lg rounded-xl p-6 shadow-xl border border-blue-800/30 ${className}`}
+        className={`bg-gradient-to-br from-blue-900/40 to-blue-950/60 backdrop-blur-lg rounded-lg md:rounded-xl p-4 sm:p-5 md:p-6 shadow-xl border border-blue-800/30 ${className}`}
       >
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-3 md:mb-4">
           <div className="p-2 bg-blue-500/10 rounded-lg">
-            <Icon className="w-5 h-5 text-blue-400" />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" />
           </div>
           {trend && trendValue !== null && (
-            <div className={`flex items-center gap-1 text-sm ${
+            <div className={`flex items-center gap-1 text-xs sm:text-sm ${
               trendValue >= 0 ? 'text-green-400' : 'text-red-400'
             }`}>
               {trendValue >= 0 ? (
-                <ArrowUpRight className="w-4 h-4" />
+                <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4" />
               ) : (
-                <ArrowDownRight className="w-4 h-4" />
+                <ArrowDownRight className="w-3 h-3 sm:w-4 sm:h-4" />
               )}
               <span>{Math.abs(trendValue)}%</span>
             </div>
           )}
         </div>
-        <h3 className="text-sm text-blue-300/80 mb-1">{title}</h3>
-        <p className="text-2xl font-bold text-white">
+        <h3 className="text-xs sm:text-sm text-blue-300/80 mb-1 line-clamp-2">{title}</h3>
+        <p className="text-lg sm:text-xl md:text-2xl font-bold text-white break-words">
           {isLoading ? (
-            <div className="animate-pulse bg-blue-400/20 h-8 w-32 rounded"></div>
+            <div className="animate-pulse bg-blue-400/20 h-6 sm:h-8 w-24 sm:w-32 rounded"></div>
           ) : (
             formattedValue || 'N/A'
           )}
@@ -108,21 +108,25 @@ const ProjectSummary = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto overflow-x-hidden">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-6 md:mb-8"
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 md:mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Project Cost Summary</h1>
-            <p className="text-blue-300/80">Comprehensive overview of your project's financial health</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
+              Project Cost Summary
+            </h1>
+            <p className="text-sm sm:text-base text-blue-300/80">
+              Comprehensive overview of your project's financial health
+            </p>
           </div>
           <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
-            className="px-4 py-2 rounded-lg bg-blue-900/20 border border-blue-800/30 text-white focus:ring-2 focus:ring-blue-500/20"
+            className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-blue-900/20 border border-blue-800/30 text-white focus:ring-2 focus:ring-blue-500/20 text-sm sm:text-base min-h-[44px] w-full sm:w-auto"
           >
             <option value="week">This Week</option>
             <option value="month">This Month</option>
@@ -131,8 +135,8 @@ const ProjectSummary = () => {
           </select>
         </div>
 
-        {/* Top Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Top Stats Grid - Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-8">
           <StatCard
             title="Total Project Cost"
             value={summaryData.totalCost}
@@ -161,22 +165,22 @@ const ProjectSummary = () => {
           />
         </div>
 
-        {/* Detailed Analysis Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Detailed Analysis Section - Responsive */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           {/* Cost Breakdown */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-gradient-to-br from-blue-900/40 to-blue-950/60 backdrop-blur-lg rounded-xl p-6 shadow-xl border border-blue-800/30 lg:col-span-2"
+            className="bg-gradient-to-br from-blue-900/40 to-blue-950/60 backdrop-blur-lg rounded-lg md:rounded-xl p-4 sm:p-5 md:p-6 shadow-xl border border-blue-800/30 lg:col-span-2"
           >
-            <h2 className="text-xl font-semibold text-white mb-4">Cost Breakdown</h2>
-            <div className="space-y-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-white mb-3 md:mb-4">Cost Breakdown</h2>
+            <div className="space-y-3 md:space-y-4">
               {isLoading ? (
                 Array(4).fill(0).map((_, i) => (
                   <div key={i} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <div className="bg-blue-400/20 h-4 w-24 rounded animate-pulse"></div>
-                      <div className="bg-blue-400/20 h-4 w-12 rounded animate-pulse"></div>
+                    <div className="flex justify-between text-xs sm:text-sm">
+                      <div className="bg-blue-400/20 h-4 w-20 sm:w-24 rounded animate-pulse"></div>
+                      <div className="bg-blue-400/20 h-4 w-10 sm:w-12 rounded animate-pulse"></div>
                     </div>
                     <div className="h-2 bg-blue-900/20 rounded-full overflow-hidden">
                       <div className="h-full bg-blue-400/20 rounded-full animate-pulse" style={{ width: '100%' }}></div>
@@ -186,7 +190,7 @@ const ProjectSummary = () => {
               ) : summaryData.costBreakdown ? (
                 Object.entries(summaryData.costBreakdown).map(([category, { percentage, color }]) => (
                   <div key={category} className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="text-blue-300">{category}</span>
                       <span className="text-white">{percentage}%</span>
                     </div>
