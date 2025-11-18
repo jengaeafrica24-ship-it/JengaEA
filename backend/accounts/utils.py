@@ -6,12 +6,14 @@ from .logger import sms_logger as logger
 # Initialize Africa's Talking
 username = getattr(settings, 'AFRICAS_TALKING_USERNAME', 'sandbox')
 api_key = getattr(settings, 'AFRICAS_TALKING_API_KEY', None)
+sender_id = getattr(settings, 'AFRICAS_TALKING_SENDER_ID', '20880')
 is_sandbox = username == 'sandbox'
 
 # Print banner to make SMS logs more visible
 logger.info("=" * 50)
 logger.info("SMS Service Initialization")
 logger.info("=" * 50)
+logger.info(f"Sender ID: {sender_id}")
 
 if not api_key:
     logger.error("Africa's Talking API key not configured!")
@@ -24,13 +26,14 @@ except Exception as e:
     logger.error(f"Failed to initialize Africa's Talking: {str(e)}")
     sms = None
 
-def send_sms(phone_number, message):
+def send_sms(phone_number, message, use_sender_id=True):
     """
     Send SMS using Africa's Talking API
     
     Args:
         phone_number (str): The recipient's phone number (should start with country code)
         message (str): The message to send
+        use_sender_id (bool): Whether to use the configured sender ID
         
     Returns:
         dict: Response containing success status and message
@@ -55,6 +58,7 @@ def send_sms(phone_number, message):
         # Log attempt details
         logger.info(f"📤 Preparing to send SMS")
         logger.info(f"   └── To: {phone_number}")
+        logger.info(f"   └── Sender ID: {sender_id if use_sender_id else 'Default'}")
         logger.info(f"   └── Message Length: {len(message)} characters")
         logger.debug(f"   └── Content: {message}")
         
@@ -64,9 +68,12 @@ def send_sms(phone_number, message):
             logger.warning("   └── Only registered test numbers will work")
             logger.warning(f"   └── Using number: {phone_number}")
         
-        # Send the message
+        # Send the message with sender ID
         logger.info("🚀 Sending SMS...")
-        response = sms.send(message, [phone_number])  # Simple send without sender_id
+        if use_sender_id and sender_id:
+            response = sms.send(message, [phone_number], sender_id)
+        else:
+            response = sms.send(message, [phone_number])
         
         # Log full response
         logger.debug("📬 API Response:")

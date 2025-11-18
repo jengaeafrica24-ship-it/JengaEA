@@ -94,18 +94,25 @@ class UserRegistrationView(generics.CreateAPIView):
             logger.info(f"User created successfully: {user.email}")
             logger.info(f"User details: id={user.id}, role={user.role}, verified={user.is_verified}")
             
+            # Send OTP after registration
+            otp_result = self._send_otp_internal(user.phone_number, user)
+            logger.info(f"OTP send result: {otp_result}")
+            
             # Create auth token
             auth_token, created = AuthToken.objects.get_or_create(user=user)
             logger.info(f"Auth token {'created' if created else 'retrieved'}: {auth_token.key[:10]}...")
             
             return Response({
                 "success": True,
-                "message": "User registered successfully",
+                "message": "User registered successfully. OTP sent to your phone.",
                 "data": {
                     "token": auth_token.key,
                     "user_id": user.id,
                     "email": user.email,
-                    "role": user.role
+                    "phone_number": user.phone_number,
+                    "role": user.role,
+                    "requires_verification": True,
+                    "otp_sent": otp_result.get('success', False)
                 }
             }, status=status.HTTP_201_CREATED)
             
@@ -136,20 +143,23 @@ class UserRegistrationView(generics.CreateAPIView):
                 expires_at=timezone.now() + timedelta(minutes=10)
             )
             
-            # Send OTP via SMS
+            # Send OTP via SMS with sender ID 20880
             from .utils import send_sms
-            message = f"Your JengaEst verification code is: {otp_code}. Valid for 10 minutes."
-            sms_result = send_sms(phone_number, message)
+            message = f"Your JengaEA verification code is: {otp_code}. Valid for 10 minutes."
+            sms_result = send_sms(phone_number, message, use_sender_id=True)
             
             if not sms_result['success']:
                 logger.error(f"Failed to send SMS: {sms_result['message']}")
-                # Log OTP for development as fallback (REMOVE IN PRODUCTION)
+                # Log OTP for development as fallback
                 logger.warning(f"[DEV MODE] OTP for {phone_number}: {otp_code}")
+            else:
+                logger.info(f"✅ OTP sent successfully to {phone_number}")
             
             return {
                 'success': True,
                 'message': 'OTP sent successfully',
-                'sms_sent': sms_result['success']
+                'sms_sent': sms_result['success'],
+                'otp_code': otp_code if not sms_result['success'] else None  # Only return OTP if SMS failed
             }
             
         except Exception as e:
@@ -282,17 +292,21 @@ def send_otp(request):
             expires_at=timezone.now() + timedelta(minutes=10)
         )
         
-        # Log OTP for development (REMOVE IN PRODUCTION)
-        logger.warning(f"[DEV MODE] OTP for {phone_number}: {otp_code}")
+        # Send OTP via Africa's Talking with sender ID 20880
+        from .utils import send_sms
+        message = f"Your JengaEA verification code is: {otp_code}. Valid for 10 minutes."
+        sms_result = send_sms(phone_number, message, use_sender_id=True)
         
-        # TODO: Send SMS via Africa's Talking
-        # from .utils import send_otp_sms
-        # send_otp_sms(phone_number, otp_code)
+        # Log OTP for development if SMS fails
+        if not sms_result['success']:
+            logger.warning(f"[DEV MODE] OTP for {phone_number}: {otp_code}")
         
         return Response({
             'success': True,
             'message': 'OTP sent successfully',
             'phone_number': phone_number,
+            'sms_sent': sms_result['success'],
+            'otp_code': otp_code if not sms_result['success'] else None  # Only show OTP if SMS failed
         }, status=status.HTTP_200_OK)
         
     except Exception as e:
