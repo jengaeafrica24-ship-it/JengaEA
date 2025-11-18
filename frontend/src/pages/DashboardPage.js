@@ -1,23 +1,36 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Home } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, LogOut } from 'lucide-react';
 import DashboardFeatures from '../components/dashboard/DashboardFeatures';
 import { useAuth } from '../contexts/AuthContext';
 
 const DashboardPage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Home Button - Responsive */}
-      <div className="flex justify-end">
+      {/* Home and Logout Buttons - Responsive */}
+      <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors duration-200 shadow-lg hover:shadow-blue-500/50 text-sm sm:text-base min-h-[44px]"
+          className="inline-flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors duration-200 shadow-lg hover:shadow-blue-500/50 text-sm sm:text-base min-h-[44px]"
         >
           <Home className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Home</span>
         </Link>
+        <button
+          onClick={handleLogout}
+          className="inline-flex items-center justify-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-white transition-colors duration-200 shadow-lg hover:shadow-red-500/50 text-sm sm:text-base min-h-[44px]"
+        >
+          <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span>Logout</span>
+        </button>
       </div>
 
       {/* Hero Section - Responsive */}
